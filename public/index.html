@@ -1,0 +1,1333 @@
+git<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Presensi Siswa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .status-hadir { background: linear-gradient(45deg, #10b981, #34d399); }
+        .status-alpa { background: linear-gradient(45deg, #ef4444, #f87171); }
+        .status-izin { background: linear-gradient(45deg, #f59e0b, #fbbf24); }
+        .status-sakit { background: linear-gradient(45deg, #8b5cf6, #a78bfa); }
+        .status-terlambat { background: linear-gradient(45deg, #f97316, #fb923c); }
+        
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        .status-online {
+            background-color: #10b981;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        .status-offline {
+            background-color: #ef4444;
+            animation: none;
+        }
+        
+        .status-error {
+            background-color: #f59e0b;
+            animation: blink 1s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .refresh-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        
+        .toast {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-left: 4px solid #10b981;
+            padding: 16px;
+            margin-bottom: 12px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .toast.hide {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        
+        .toast-success { border-left-color: #10b981; }
+        .toast-info { border-left-color: #3b82f6; }
+        .toast-warning { border-left-color: #f59e0b; }
+        .toast-error { border-left-color: #ef4444; }
+        
+        .professional-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .professional-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        /* Glass morphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        /* Button styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px 0 rgba(59, 130, 246, 0.4);
+        }
+
+        
+        .professional-button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen">
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+    
+
+    <!-- Clean Header -->
+    <!-- <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="container mx-auto px-6">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-user-check text-blue-600 text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">Sistem Presensi</h1>
+                        <p class="text-xs text-gray-500">Real-time Monitoring</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="connectionStatus" class="flex items-center text-sm text-gray-600">
+                        <div id="statusIndicator" class="loading-dot mr-2"></div>
+                        <span id="statusText">Live</span>
+                        <span id="lastUpdate" class="ml-2 text-xs text-gray-400"></span>
+                        <span id="nextRefresh" class="ml-2 text-xs text-blue-400"></span>
+                    </div>
+                    <button onclick="checkCard()" class="border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2 font-medium">
+                        <i class="fas fa-id-card"></i>
+                        <span>Cek Kartu Presensi</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header> -->
+    <header class="glass sticky top-0 z-40 border-b border-white/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 sm:h-20">
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-user-check text-white text-sm sm:text-lg"></i>
+                </div>
+                <div class="hidden sm:block">
+                    <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        Sistem Presensi
+                    </h1>
+                    <p class="text-xs text-gray-500">Real-time Monitoring</p>
+                </div>
+                <div class="block sm:hidden">
+                    <h1 class="text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        Presensi
+                    </h1>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <div id="connectionStatus" class="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
+                    <div id="statusIndicator" class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span id="statusText">Live</span>
+                    <span id="lastUpdate" class="text-xs text-gray-400"></span>
+                    <span id="nextRefresh" class="text-xs text-blue-400"></span>
+                </div>
+                <button onclick="checkCard()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+                    <i class="fas fa-id-card text-sm"></i>
+                    <span class="hidden sm:inline">Cek Kartu Presensi</span>
+                    <span class="sm:hidden">Cek</span>
+                </button>
+                <button id="refreshButton" onclick="manualRefresh()" class="btn-touch bg-white text-blue-600 hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-blue-200">
+                        <i id="refreshIcon" class="fas fa-sync-alt"></i>
+                        <span class="hidden sm:inline">Refresh</span>
+                        <span class="sm:hidden">Ref</span>
+                    </button>
+                 
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8"></div>
+        <div class="mb-6 sm:mb-8">
+            <div class="text-center mb-6 sm:mb-8">
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Dashboard Presensi</h2>
+                <p class="text-sm sm:text-base text-gray-600">Monitoring kehadiran siswa secara real-time</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- Dashboard Statistik -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 card-shadow animate-fade-in border border-gray-100">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-50 text-green-600">
+                        <i class="fas fa-user-check text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm font-medium">Total Hadir</p>
+                        <p id="totalHadir" class="text-2xl font-bold text-gray-800">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 card-shadow animate-fade-in border border-gray-100">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-red-50 text-red-600">
+                        <i class="fas fa-user-times text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm font-medium">Total Alpa</p>
+                        <p id="totalAlpa" class="text-2xl font-bold text-gray-800">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 card-shadow animate-fade-in border border-gray-100">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-50 text-purple-600">
+                        <i class="fas fa-user-injured text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm font-medium">Total Sakit</p>
+                        <p id="totalSakit" class="text-2xl font-bold text-gray-800">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 card-shadow animate-fade-in border border-gray-100">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-50 text-yellow-600">
+                        <i class="fas fa-user-clock text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm font-medium">Total Izin</p>
+                        <p id="totalIzin" class="text-2xl font-bold text-gray-800">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 card-shadow animate-fade-in border border-gray-100">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-orange-50 text-orange-600">
+                        <i class="fas fa-clock text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm font-medium">Total Terlambat</p>
+                        <p id="totalTerlambat" class="text-2xl font-bold text-gray-800">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="bg-white rounded-xl p-6 card-shadow mb-8 animate-fade-in border border-gray-100">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter Tanggal</label>
+                        <input type="date" id="filterDate" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter Bulan</label>
+                        <select id="filterMonth" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Semua Bulan</option>
+                            <option value="01">Januari</option>
+                            <option value="02">Februari</option>
+                            <option value="03">Maret</option>
+                            <option value="04">April</option>
+                            <option value="05">Mei</option>
+                            <option value="06">Juni</option>
+                            <option value="07">Juli</option>
+                            <option value="08">Agustus</option>
+                            <option value="09">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Desember</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter Kelas</label>
+                        <select id="filterKelas" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Semua Kelas</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rekap Per Kelas</label>
+                        <select id="rekapKelas" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Pilih Kelas untuk Rekap</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <!-- <button onclick="manualRefresh()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                        <i id="refreshIcon" class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button> -->
+                    <button onclick="exportData()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+                        <i class="fas fa-download"></i>
+                        Export CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rekap Kelas Display -->
+        <div id="classRekapDisplay" class="bg-white rounded-xl card-shadow mb-8 animate-fade-in border border-gray-100 hidden">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-chart-bar mr-2 text-green-600"></i>
+                    Rekap Presensi Kelas <span id="selectedClassName" class="text-blue-600"></span>
+                </h2>
+            </div>
+            <div class="p-6">
+                <div id="classRekapContent" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <!-- Content will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Riwayat Presensi Terbaru -->
+            <div class="bg-white rounded-xl card-shadow animate-fade-in border border-gray-100">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-history mr-2 text-blue-600"></i>
+                        Riwayat Presensi Terbaru
+                        <span class="ml-2 text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded-full">10 Data Terbaru</span>
+                    </h2>
+                </div>
+                
+                <div class="p-6">
+                    <div id="recentAttendance" class="space-y-3">
+                        <!-- Data akan dimuat di sini -->
+                    </div>
+                    
+                    <div id="noRecentData" class="text-center py-8 hidden">
+                        <i class="fas fa-inbox text-3xl text-gray-400 mb-3"></i>
+                        <p class="text-gray-500">Belum ada data presensi terbaru</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rekap Berdasarkan Tanggal dan Bulan -->
+            <div class="bg-white rounded-xl card-shadow animate-fade-in border border-gray-100">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-calendar-alt mr-2 text-purple-600"></i>
+                        Rekap Presensi Berdasarkan Periode
+                    </h2>
+                </div>
+                
+                <div class="p-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Periode</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hadir</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alpa</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sakit</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Izin</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="periodRecap" class="bg-white divide-y divide-gray-200">
+                                <!-- Data akan dimuat di sini -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="noPeriodData" class="text-center py-8 hidden">
+                        <i class="fas fa-calendar-times text-3xl text-gray-400 mb-3"></i>
+                        <p class="text-gray-500">Belum ada data rekap periode</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <!-- <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="container mx-auto px-6 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-bold mb-4 text-gray-800">Sistem Presensi Siswa</h3>
+                    <p class="text-gray-600">Sistem monitoring kehadiran siswa secara real-time dengan teknologi modern.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4 text-gray-800">Fitur</h3>
+                    <ul class="text-gray-600 space-y-2">
+                        <li><i class="fas fa-check mr-2 text-green-500"></i>Real-time Updates</li>
+                        <li><i class="fas fa-check mr-2 text-green-500"></i>Rekap Otomatis</li>
+                        <li><i class="fas fa-check mr-2 text-green-500"></i>Export Data</li>
+                        <li><i class="fas fa-check mr-2 text-green-500"></i>Multi Filter</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4 text-gray-800">Informasi</h3>
+                    <div class="text-gray-600 space-y-2">
+                        <p><i class="fas fa-clock mr-2 text-blue-500"></i>Update setiap detik</p>
+                        <p><i class="fas fa-database mr-2 text-blue-500"></i>Data dari Google Sheets</p>
+                        <p><i class="fas fa-shield-alt mr-2 text-blue-500"></i>Aman & Terpercaya</p>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 mt-8 pt-8 text-center text-gray-500">
+                <p>&copy; 2024 Sistem Presensi Siswa. Dibuat dengan ❤️ untuk pendidikan.</p>
+            </div>
+        </div>
+    </footer> -->
+    <!-- Footer dengan gradient -->
+    <footer class="bg-gradient-to-r from-lime-600 via-emerald-700 to-green-900 text-white py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-clipboard-check text-white"></i>
+                        </div>
+                        <h4 class="text-xl font-bold">Sistem Presensi Digital</h4>
+                    </div>
+                    <p class="text-gray-300 mb-4 leading-relaxed">
+                        Platform manajemen presensi modern yang terintegrasi dengan Google Sheets untuk monitoring kehadiran siswa secara real-time dengan teknologi terdepan.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Fitur Utama</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-400 text-sm"></i>
+                            <span>Monitoring Real-time</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-400 text-sm"></i>
+                            <span>Rekap Otomatis</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-400 text-sm"></i>
+                            <span>Statistik Lengkap</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-400 text-sm"></i>
+                            <span>Export Data</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-400 text-sm"></i>
+                            <span>Multi-platform</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Kontak & Support</h4>
+                    <div class="space-y-3 text-gray-300">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-blue-400"></i>
+                            <span>admin@sekolah.edu</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-phone text-blue-400"></i>
+                            <span>(021) 123-4567</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-map-marker-alt text-blue-400"></i>
+                            <span>Jakarta, Indonesia</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-clock text-blue-400"></i>
+                            <span>24/7 Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-white/10 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-300 text-sm">
+                    &copy; 2024 Sistem Presensi Digital. Dibuat dengan <i class="fas fa-heart text-red-400 mx-1"></i> untuk pendidikan Indonesia.
+                </p>
+                <div class="flex space-x-6 mt-4 md:mt-0 text-sm text-gray-300">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                    <a href="#" class="hover:text-white transition-colors">Help Center</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+
+    <script>
+        // Konfigurasi Google Sheets
+        const SHEET_ID = '1LvWRd5YkB9zM5LZaMhc07FgIQMwH4cuCrmDsPhYMlYM';
+        const API_KEY = 'AIzaSyAJZCA_UFQPi_bJLPyhIX82zevOWq9BTZI';
+        const RANGE = 'Sheet1!A:O';
+        
+        // Variabel global
+        
+        let allData = [];
+        let filteredData = [];
+        let lastDataCount = 0;
+        let refreshInterval;
+        let countdownInterval;
+        let isOnline = navigator.onLine;
+        let consecutiveErrors = 0;
+        let lastUpdateTime = null;
+        let refreshRate = 10000; // 10 detik default
+        let nextRefreshTime = null;
+        // let refreshIntervalId; // Variabel global untuk menyimpan ID dari setInterval
+        
+        // Toast Notification System
+        function showToast(message, type = 'success', duration = 3000) {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const iconMap = {
+                success: 'fas fa-check-circle text-green-500',
+                info: 'fas fa-info-circle text-blue-500',
+                warning: 'fas fa-exclamation-triangle text-yellow-500',
+                error: 'fas fa-times-circle text-red-500'
+            };
+            
+            toast.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="${iconMap[type]} mr-3"></i>
+                        <span class="text-gray-800 font-medium">${message}</span>
+                    </div>
+                    <button onclick="closeToast(this)" class="text-gray-400 hover:text-gray-600 ml-4">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Show toast
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            // Auto hide
+            setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+        }
+        
+        function closeToast(button) {
+            const toast = button.closest('.toast');
+            toast.classList.add('hide');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }
+        
+        // Fungsi untuk mengambil data dari Google Sheets
+        // Fungsi untuk mengambil data dari Google Sheets
+async function fetchDataFromSheets(showLoading = false) {
+    if (showLoading) {
+        updateConnectionStatus('loading', 'Memuat data...');
+    }
+    
+    try {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.values && data.values.length > 1) {
+            // ---- MODIFIKASI DI SINI ----
+            // Ambil semua baris kecuali header, lalu langsung balik urutannya.
+            // Data yang paling baru (di baris bawah sheet) kini akan berada di awal array.
+            const rows = data.values.slice(1).reverse(); 
+            // -----------------------------
+
+            const newDataCount = rows.length;
+            
+            // Reset error counter on successful fetch
+            consecutiveErrors = 0;
+            
+            // Cek apakah ada data baru (logika ini tetap berfungsi dengan benar)
+            if (newDataCount > lastDataCount && lastDataCount > 0) {
+                const newRecords = newDataCount - lastDataCount;
+                showToast(`${newRecords} data presensi baru ditambahkan!`, 'success');
+                
+                // Play notification sound (optional)
+                playNotificationSound();
+            }
+            lastDataCount = newDataCount;
+            
+            // Update timestamp
+            lastUpdateTime = new Date();
+            
+            // Proses mapping sekarang akan memproses data dari yang terbaru ke yang terlama
+            allData = rows.map(row => ({
+                date: row[3] || '',
+                tanggal: row[1] || '',
+                bulan: row[3] || '',
+                jam: row[4] || '',
+                scan: row[5] || '',
+                namaSiswa: row[7] || '',
+                namaLengkap: row[6] || '',
+                nohp: row[8] || '',
+                rombel: row[9] || '',
+                kelas: row[10] || '',
+                keterangan: row[11] || '',
+                catatan: row[12] || '',
+                mataPelajaran: row[13] || '',
+                jamPelajaran: row[14] || ''
+            }));
+            
+            // Panggil fungsi-fungsi lain untuk update tampilan
+            updateStatistics();
+            populateFilters();
+            displayRecentAttendance(); // Fungsi ini akan menerima allData yang sudah terurut BARU ke LAMA
+            displayPeriodRecap();
+            
+            updateConnectionStatus('online', 'Terhubung');
+        } else {
+            updateConnectionStatus('online', 'Tidak ada data');
+        }
+        
+        return Promise.resolve();
+        
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        consecutiveErrors++;
+        
+        if (consecutiveErrors >= 3) {
+            updateConnectionStatus('error', 'Koneksi bermasalah');
+            showToast('Koneksi tidak stabil. Mencoba ulang...', 'warning');
+        } else {
+            updateConnectionStatus('error', 'Gagal memuat');
+        }
+        
+        return Promise.reject(error);
+    }
+}
+        
+        // Fungsi untuk memperbarui statistik
+        function updateStatistics() {
+            const hadir = allData.filter(item => item.keterangan.toLowerCase().includes('hadir')).length;
+            const alpa = allData.filter(item => item.keterangan.toLowerCase().includes('alpa')).length;
+            const sakit = allData.filter(item => item.keterangan.toLowerCase().includes('sakit')).length;
+            const izin = allData.filter(item => item.keterangan.toLowerCase().includes('izin')).length;
+            const terlambat = allData.filter(item => item.keterangan.toLowerCase().includes('terlambat')).length;
+            
+            document.getElementById('totalHadir').textContent = hadir;
+            document.getElementById('totalAlpa').textContent = alpa;
+            document.getElementById('totalSakit').textContent = sakit;
+            document.getElementById('totalIzin').textContent = izin;
+            document.getElementById('totalTerlambat').textContent = terlambat;
+        }
+        
+        // Fungsi untuk mengisi filter
+        function populateFilters() {
+            const kelasSet = new Set(allData.map(item => item.kelas).filter(kelas => kelas));
+            const filterKelas = document.getElementById('filterKelas');
+            const rekapKelas = document.getElementById('rekapKelas');
+            
+            // Clear existing options
+            while (filterKelas.children.length > 1) {
+                filterKelas.removeChild(filterKelas.lastChild);
+            }
+            while (rekapKelas.children.length > 1) {
+                rekapKelas.removeChild(rekapKelas.lastChild);
+            }
+            
+            // Add new options
+            Array.from(kelasSet).sort().forEach(kelas => {
+                const option1 = document.createElement('option');
+                option1.value = kelas;
+                option1.textContent = kelas;
+                filterKelas.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = kelas;
+                option2.textContent = kelas;
+                rekapKelas.appendChild(option2);
+            });
+        }
+        
+        // Fungsi untuk menampilkan rekap kelas
+        function displayClassRecap(selectedClass) {
+            const display = document.getElementById('classRekapDisplay');
+            const content = document.getElementById('classRekapContent');
+            const className = document.getElementById('selectedClassName');
+            
+            if (!selectedClass) {
+                display.classList.add('hidden');
+                return;
+            }
+            
+            const classData = allData.filter(item => item.kelas === selectedClass);
+            
+            if (classData.length === 0) {
+                display.classList.add('hidden');
+                return;
+            }
+            
+            const stats = {
+                hadir: classData.filter(item => item.keterangan.toLowerCase().includes('hadir')).length,
+                alpa: classData.filter(item => item.keterangan.toLowerCase().includes('alpa')).length,
+                sakit: classData.filter(item => item.keterangan.toLowerCase().includes('sakit')).length,
+                izin: classData.filter(item => item.keterangan.toLowerCase().includes('izin')).length,
+                terlambat: classData.filter(item => item.keterangan.toLowerCase().includes('terlambat')).length
+            };
+            
+            stats.total = stats.hadir + stats.alpa + stats.sakit + stats.izin + stats.terlambat;
+            
+            className.textContent = selectedClass;
+            content.innerHTML = `
+                <div class="text-center p-4 bg-green-50 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600">${stats.hadir}</div>
+                    <div class="text-sm text-gray-600">Hadir</div>
+                </div>
+                <div class="text-center p-4 bg-red-50 rounded-lg">
+                    <div class="text-2xl font-bold text-red-600">${stats.alpa}</div>
+                    <div class="text-sm text-gray-600">Alpa</div>
+                </div>
+                <div class="text-center p-4 bg-purple-50 rounded-lg">
+                    <div class="text-2xl font-bold text-purple-600">${stats.sakit}</div>
+                    <div class="text-sm text-gray-600">Sakit</div>
+                </div>
+                <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                    <div class="text-2xl font-bold text-yellow-600">${stats.izin}</div>
+                    <div class="text-sm text-gray-600">Izin</div>
+                </div>
+                <div class="text-center p-4 bg-blue-50 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600">${stats.total}</div>
+                    <div class="text-sm text-gray-600">Total</div>
+                </div>
+            `;
+            
+            display.classList.remove('hidden');
+        }
+        
+        
+         // Fungsi untuk menampilkan riwayat presensi terbaru
+        function displayRecentAttendance() {
+            const container = document.getElementById('recentAttendance');
+            const noDataMessage = document.getElementById('noRecentData');
+            
+            // Urutkan berdasarkan waktu terbaru dan ambil 10 terakhir
+            const recentData = [...allData]
+                .sort((a, b) => {
+                    const dateTimeA = new Date(a.date + ' ' + a.jam);
+                    const dateTimeB = new Date(b.date + ' ' + b.jam);
+                    return dateTimeB - dateTimeA;
+                })
+                .slice(0, 10);
+            
+            if (recentData.length === 0) {
+                container.classList.add('hidden');
+                noDataMessage.classList.remove('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            noDataMessage.classList.add('hidden');
+            
+            // Cek apakah ada perubahan data
+            const currentDataString = JSON.stringify(recentData);
+            if (container.dataset.lastData === currentDataString) {
+                return; // Tidak ada perubahan, tidak perlu update
+            }
+            container.dataset.lastData = currentDataString;
+            
+            // Animate new data
+            container.style.opacity = '0.7';
+            setTimeout(() => {
+                container.innerHTML = '';
+                
+                recentData.forEach((item, index) => {
+                    const statusClass = getStatusClass(item.keterangan);
+                    const statusBadge = getStatusBadge(item.keterangan);
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between p-4 bg-white border border-gray-100 rounded-lg hover:shadow-md transition-all duration-200 animate-fade-in';
+                    div.style.animationDelay = `${index * 50}ms`;
+                    
+                    div.innerHTML = `
+                        <div class="flex items-center space-x-4">
+                            <div class="relative">
+                                <div class="w-12 h-12 rounded-full ${statusClass} flex items-center justify-center text-white font-bold shadow-sm">
+                                    ${getStatusIcon(item.keterangan)}
+                                </div>
+                                
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-1">
+                                    <h4 class="font-semibold text-gray-900">${item.namaLengkap || item.namaSiswa}</h4>
+                                    ${statusBadge}
+                                </div>
+                                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-graduation-cap mr-1"></i>
+                                        ${item.kelas}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i class="fas fa-book mr-1"></i>
+                                        ${item.mataPelajaran}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm font-medium text-gray-900 mb-1">${formatDate(item.tanggal)}</div>
+                            <div class="text-sm text-gray-500 flex items-center justify-end">
+                                <i class="fas fa-clock mr-1"></i>
+                                ${item.jam}
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(div);
+                });
+                
+                container.style.opacity = '1';
+            }, 150);
+        }
+        
+        // Helper function untuk format tanggal
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+            return date.toLocaleDateString('id-ID', options);
+        }
+        
+        
+         // Helper function untuk status badge
+        function getStatusBadge(keterangan) {
+            const ket = keterangan.toLowerCase();
+            let badgeClass = '';
+            let badgeText = '';
+            
+            if (ket.includes('hadir')) {
+                badgeClass = 'bg-green-100 text-green-800';
+                badgeText = 'Hadir';
+            } else if (ket.includes('alpa')) {
+                badgeClass = 'bg-red-100 text-red-800';
+                badgeText = 'Alpa';
+            } else if (ket.includes('izin')) {
+                badgeClass = 'bg-yellow-100 text-yellow-800';
+                badgeText = 'Izin';
+            } else if (ket.includes('sakit')) {
+                badgeClass = 'bg-purple-100 text-purple-800';
+                badgeText = 'Sakit';
+            } else if (ket.includes('terlambat')) {
+                badgeClass = 'bg-orange-100 text-orange-800';
+                badgeText = 'Terlambat';
+            } else {
+                badgeClass = 'bg-gray-100 text-gray-800';
+                badgeText = 'Unknown';
+            }
+            
+            return `<span class="px-2 py-1 text-xs font-medium rounded-full ${badgeClass}">${badgeText}</span>`;
+        }
+        
+
+        
+        // Fungsi untuk menampilkan rekap periode
+        function displayPeriodRecap() {
+            const container = document.getElementById('periodRecap');
+            const noDataMessage = document.getElementById('noPeriodData');
+            
+            // Grup data berdasarkan bulan
+            const periodData = {};
+            allData.forEach(item => {
+                if (!item.tanggal) return;
+                
+                const period = item.bulan || item.tanggal.substring(0, 7);
+                
+                if (!periodData[period]) {
+                    periodData[period] = {
+                        hadir: 0,
+                        alpa: 0,
+                        sakit: 0,
+                        izin: 0,
+                        terlambat: 0,
+                        total: 0
+                    };
+                }
+                
+                const ket = item.keterangan.toLowerCase();
+                if (ket.includes('hadir')) periodData[period].hadir++;
+                else if (ket.includes('alpa')) periodData[period].alpa++;
+                else if (ket.includes('sakit')) periodData[period].sakit++;
+                else if (ket.includes('izin')) periodData[period].izin++;
+                else if (ket.includes('terlambat')) periodData[period].terlambat++;
+                
+                periodData[period].total++;
+            });
+            
+            if (Object.keys(periodData).length === 0) {
+                container.classList.add('hidden');
+                noDataMessage.classList.remove('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            noDataMessage.classList.add('hidden');
+            container.innerHTML = '';
+            
+            Object.entries(periodData).forEach(([period, data]) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                row.innerHTML = `
+                    <td class="px-4 py-3 font-medium text-gray-800">${period}</td>
+                    <td class="px-4 py-3 text-green-600 font-medium">${data.hadir}</td>
+                    <td class="px-4 py-3 text-red-600 font-medium">${data.alpa}</td>
+                    <td class="px-4 py-3 text-purple-600 font-medium">${data.sakit}</td>
+                    <td class="px-4 py-3 text-yellow-600 font-medium">${data.izin}</td>
+                    <td class="px-4 py-3 font-bold text-gray-800">${data.total}</td>
+                `;
+                
+                container.appendChild(row);
+            });
+        }
+        
+        // Fungsi helper untuk status
+        function getStatusClass(keterangan) {
+            const ket = keterangan.toLowerCase();
+            if (ket.includes('hadir')) return 'bg-green-500';
+            if (ket.includes('alpa')) return 'bg-red-500';
+            if (ket.includes('izin')) return 'bg-yellow-500';
+            if (ket.includes('sakit')) return 'bg-purple-500';
+            if (ket.includes('terlambat')) return 'bg-orange-500';
+            return 'bg-gray-500';
+        }
+        
+        function getStatusIcon(keterangan) {
+            const ket = keterangan.toLowerCase();
+            if (ket.includes('hadir')) return '✓';
+            if (ket.includes('alpa')) return '✗';
+            if (ket.includes('izin')) return 'I';
+            if (ket.includes('sakit')) return 'S';
+            if (ket.includes('terlambat')) return '⏰';
+            return '?';
+        }
+        
+        // Fungsi untuk cek kartu presensi
+        function checkCard() {
+            showToast('Fitur cek kartu presensi akan segera tersedia!', 'info');
+        }
+        
+        // Fungsi untuk export data
+        function exportData() {
+            if (allData.length === 0) {
+                showToast('Tidak ada data untuk diekspor', 'warning');
+                return;
+            }
+            
+            const headers = ['Tanggal', 'Bulan', 'Jam', 'Scan', 'Nama Siswa', 'Nama Lengkap', 'No HP', 'Rombel', 'Kelas', 'Keterangan', 'Catatan', 'Mata Pelajaran', 'Jam Pelajaran'];
+            const csvContent = [
+                headers.join(','),
+                ...allData.map(item => [
+                    item.tanggal,
+                    item.bulan,
+                    item.jam,
+                    item.scan,
+                    `"${item.namaSiswa}"`,
+                    `"${item.namaLengkap}"`,
+                    item.nohp,
+                    `"${item.rombel}"`,
+                    `"${item.kelas}"`,
+                    `"${item.keterangan}"`,
+                    `"${item.catatan || ''}"`,
+                    `"${item.mataPelajaran}"`,
+                    item.jamPelajaran
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `presensi_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            showToast('Data berhasil diekspor!', 'success');
+        }
+        
+        // Event listeners untuk filter
+        document.getElementById('filterDate').addEventListener('change', () => {
+            displayRecentAttendance();
+            displayPeriodRecap();
+        });
+        
+        document.getElementById('filterMonth').addEventListener('change', () => {
+            displayRecentAttendance();
+            displayPeriodRecap();
+        });
+        
+        document.getElementById('filterKelas').addEventListener('change', () => {
+            displayRecentAttendance();
+            displayPeriodRecap();
+        });
+        
+        document.getElementById('rekapKelas').addEventListener('change', (e) => {
+            displayClassRecap(e.target.value);
+        });
+        
+        // Fungsi untuk update status koneksi
+        function updateConnectionStatus(status, text) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            const lastUpdate = document.getElementById('lastUpdate');
+            
+            // Reset classes
+            indicator.className = 'w-2 h-2 rounded-full status-indicator';
+            
+            switch(status) {
+                case 'online':
+                    indicator.classList.add('status-online', 'pulse-animation');
+                    statusText.textContent = text;
+                    statusText.className = 'font-medium text-green-600';
+                    break;
+                case 'offline':
+                    indicator.classList.add('status-error');
+                    indicator.classList.remove('pulse-animation');
+                    statusText.textContent = 'Offline';
+                    statusText.className = 'font-medium text-red-600';
+                    break;
+                case 'error':
+                    indicator.classList.add('status-error');
+                    indicator.classList.remove('pulse-animation');
+                    statusText.textContent = text;
+                    statusText.className = 'font-medium text-yellow-600';
+                    break;
+                case 'loading':
+                    indicator.classList.add('status-loading', 'pulse-animation');
+                    statusText.textContent = text;
+                    statusText.className = 'font-medium text-blue-600';
+                    break;
+            }
+            
+            // Update last update time
+            updateLastUpdateTime();
+        }
+        
+        // Fungsi untuk update waktu terakhir update
+        function updateLastUpdateTime() {
+            const lastUpdate = document.getElementById('lastUpdate');
+            if (lastUpdateTime) {
+                const timeAgo = getTimeAgo(lastUpdateTime);
+                lastUpdate.textContent = `• ${timeAgo}`;
+            } else {
+                lastUpdate.textContent = '• belum ada update';
+            }
+        }
+        
+        // Fungsi untuk mendapatkan waktu relatif
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 5) {
+                return 'baru saja';
+            } else if (diffInSeconds < 60) {
+                return `${diffInSeconds} detik lalu`;
+            } else if (diffInSeconds < 3600) {
+                const minutes = Math.floor(diffInSeconds / 60);
+                return `${minutes} menit lalu`;
+            } else if (diffInSeconds < 86400) {
+                const hours = Math.floor(diffInSeconds / 3600);
+                return `${hours} jam lalu`;
+            } else {
+                const days = Math.floor(diffInSeconds / 86400);
+                return `${days} hari lalu`;
+            }
+        }
+        
+        // Fungsi untuk update waktu saat ini
+        function updateCurrentTime() {
+            const currentTimeElement = document.getElementById('currentTime');
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            currentTimeElement.textContent = timeString;
+        }
+        
+        // Fungsi untuk memulai auto refresh
+        function startAutoRefresh() {
+            // Clear existing intervals if any
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            // Set next refresh time
+            nextRefreshTime = new Date(Date.now() + refreshRate);
+            
+            // Start auto refresh every 10 seconds
+            refreshInterval = setInterval(() => {
+                console.log('Auto refresh triggered at:', new Date().toLocaleTimeString());
+                nextRefreshTime = new Date(Date.now() + refreshRate);
+                
+                fetchDataFromSheets().catch(error => {
+                    console.error('Auto refresh failed:', error);
+                    // Don't stop auto refresh on error, just log it
+                });
+            }, refreshRate);
+            
+            console.log('Auto refresh started - will update every', refreshRate/1000, 'seconds');
+            showToast(`Auto refresh aktif - update setiap ${refreshRate/1000} detik`, 'info', 2000);
+        }
+        
+        // Fungsi untuk refresh manual
+        function manualRefresh() {
+            const icon = document.getElementById('refreshIcon');
+            icon.classList.add('refresh-spin');
+            
+            // Reset next refresh time
+            nextRefreshTime = new Date(Date.now() + refreshRate);
+            
+            fetchDataFromSheets(true).then(() => {
+                showToast('Data berhasil diperbarui!', 'success', 2000);
+            }).catch(error => {
+                showToast('Gagal memperbarui data. Coba lagi.', 'error');
+            }).finally(() => {
+                setTimeout(() => {
+                    icon.classList.remove('refresh-spin');
+                }, 1000);
+            });
+        }
+        
+        // Fungsi untuk notifikasi suara (opsional)
+        function playNotificationSound() {
+            try {
+                // Create audio context for notification sound
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } catch (error) {
+                // Ignore audio errors
+                console.log('Audio notification not supported');
+            }
+        }
+        
+        // Event listeners untuk koneksi
+        window.addEventListener('online', () => {
+            isOnline = true;
+            consecutiveErrors = 0; // Reset error counter
+            updateConnectionStatus('online', 'Kembali online');
+            showToast('Koneksi internet kembali normal', 'success');
+            startAutoRefresh();
+        });
+        
+        window.addEventListener('offline', () => {
+            isOnline = false;
+            updateConnectionStatus('offline', 'Tidak ada koneksi');
+            showToast('Koneksi internet terputus', 'error');
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        });
+        
+        // Fungsi untuk update countdown
+        function updateCountdown() {
+            const nextRefreshElement = document.getElementById('nextRefresh');
+            if (nextRefreshTime && refreshInterval) {
+                const now = new Date();
+                const timeLeft = Math.max(0, Math.ceil((nextRefreshTime - now) / 1000));
+                
+                if (timeLeft > 0) {
+                    nextRefreshElement.textContent = `• refresh dalam ${timeLeft}s`;
+                } else {
+                    nextRefreshElement.textContent = '• sedang refresh...';
+                }
+            } else {
+                nextRefreshElement.textContent = '';
+            }
+        }
+        
+        // Update waktu setiap detik
+        setInterval(() => {
+            updateCurrentTime();
+            updateLastUpdateTime();
+            updateCountdown();
+        }, 1000);
+        
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing system...');
+            manualRefresh();
+            document.getElementById('refreshButton').addEventListener('click', manualRefresh);
+            updateCurrentTime();
+            updateConnectionStatus('loading', 'Memuat...');
+            
+            // Load data pertama kali dan mulai auto refresh
+            fetchDataFromSheets(true).then(() => {
+                console.log('Initial data loaded successfully');
+                startAutoRefresh();
+                
+                // Show welcome toast after successful initialization
+                setTimeout(() => {
+                    showToast('Sistem presensi siap digunakan! Data akan ter-refresh otomatis setiap 10 detik.', 'success');
+                }, 500);
+            }).catch(error => {
+                console.error('Failed to load initial data:', error);
+                updateConnectionStatus('error', 'Gagal memuat data awal');
+                showToast('Gagal memuat data awal. Mencoba ulang...', 'error');
+                
+                // Retry after 5 seconds
+                setTimeout(() => {
+                    fetchDataFromSheets(true).then(() => {
+                        startAutoRefresh();
+                    });
+                }, 5000);
+            });
+        });
+        
+        // Fallback initialization if DOMContentLoaded already fired
+        if (document.readyState === 'loading') {
+            // DOM is still loading
+        } else {
+            // DOM is already loaded
+            console.log('DOM already loaded, initializing system...');
+            
+            updateCurrentTime();
+            updateConnectionStatus('loading', 'Memuat...');
+            
+            fetchDataFromSheets(true).then(() => {
+                console.log('Initial data loaded successfully');
+                startAutoRefresh();
+                
+                setTimeout(() => {
+                    showToast('Sistem presensi siap digunakan! Data akan ter-refresh otomatis setiap 10 detik.', 'success');
+                }, 500);
+            }).catch(error => {
+                console.error('Failed to load initial data:', error);
+                updateConnectionStatus('error', 'Gagal memuat data awal');
+                showToast('Gagal memuat data awal. Mencoba ulang...', 'error');
+                
+                setTimeout(() => {
+                    fetchDataFromSheets(true).then(() => {
+                        startAutoRefresh();
+                    });
+                }, 5000);
+            });
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a38f1de6f7604a',t:'MTc1NDM2ODIyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

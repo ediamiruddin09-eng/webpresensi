@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap Presensi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Libraries for Export functionality -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .table-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .card-shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
+        .status-hadir { background-color: #dcfce7; color: #166534; }
+        .status-alpa { background-color: #fecaca; color: #991b1b; }
+        .status-sakit { background-color: #fef3c7; color: #92400e; }
+        .status-izin { background-color: #dbeafe; color: #1e40af; }
+        
+        /* Custom scrollbar for horizontal scroll */
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 8px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Fixed column widths and sticky positioning */
+        .col-no { width: 70px; min-width: 70px; max-width: 70px; }
+        .col-rombel { width: 80px; min-width: 80px; max-width: 80px; }
+        .col-kelas { width: 70px; min-width: 70px; max-width: 70px; }
+        .col-nisn { width: 120px; min-width: 120px; max-width: 120px; }
+        .col-nama { width: 180px; min-width: 180px; max-width: 180px; }
+        .col-nama-lengkap { width: 200px; min-width: 200px; max-width: 200px; }
+        .col-semester { width: 80px; min-width: 80px; max-width: 80px; }
+        .col-date { width: 80px; min-width: 80px; max-width: 80px; }
+        .col-summary { width: 60px; min-width: 60px; max-width: 60px; }
+        
+        /* Sticky column positioning */
+        .sticky-col { position: sticky; background: white; z-index: 20; }
+        .sticky-col.col-no { left: 2px; }
+        .sticky-col.col-rombel { left: 60px; }
+        .sticky-col.col-kelas { left: 120px; }
+        .sticky-col.col-nisn { left: 190px; }
+        .sticky-col.col-nama { left: 310px; }
+        .sticky-col.col-nama-lengkap { left: 490px; }
+        .sticky-col.col-semester { left: 690px; border-right: 2px solid #e5e7eb; }
+        
+        /* Header sticky positioning */
+        .sticky-header { position: sticky; background: #f9fafb; z-index: 30; }
+        .sticky-header.col-no { left: 2px; }
+        .sticky-header.col-rombel { left: 60px; }
+        .sticky-header.col-kelas { left: 120px; }
+        .sticky-header.col-nisn { left: 190px; }
+        .sticky-header.col-nama { left: 310px; }
+        .sticky-header.col-nama-lengkap { left: 490px; }
+        .sticky-header.col-semester { left: 690px; border-right: 2px solid #e5e7eb; }
+        
+        /* Shadow for sticky columns */
+        .sticky-col.col-semester::after,
+        .sticky-header.col-semester::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -10px;
+            bottom: 0;
+            width: 10px;
+            background: linear-gradient(to right, rgba(0,0,0,0.1), transparent);
+            pointer-events: none;
+        }
+         
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Rekap Presensi</h1>
+                    <p class="text-sm text-gray-600 mt-1">Sistem Monitoring Kehadiran Siswa</p>
+                </div>
+                
+                <!-- Filter Bulan -->
+                <div class="flex items-center gap-3">
+                    <label class="text-sm font-medium text-gray-700">Filter Bulan:</label>
+                    <select id="monthFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm">
+                        <option value="">Semua Bulan</option>
+                        <option value="2024-01">Januari 2024</option>
+                        <option value="2024-02">Februari 2024</option>
+                        <option value="2024-03">Maret 2024</option>
+                        <option value="2024-04">April 2024</option>
+                        <option value="2024-05">Mei 2024</option>
+                        <option value="2024-06">Juni 2024</option>
+                        <option value="2024-07">Juli 2024</option>
+                        <option value="2024-08">Agustus 2024</option>
+                        <option value="2024-09">September 2024</option>
+                        <option value="2024-10">Oktober 2024</option>
+                        <option value="2024-11">November 2024</option>
+                        <option value="2024-12">Desember 2024</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Connection Status and Controls -->
+        <div class="bg-white rounded-lg card-shadow p-6 mb-6">
+            <!-- Connection Status Bar -->
+            <div class="flex items-center justify-between mb-4 p-3 rounded-lg" id="connectionStatus">
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <div id="connectionIndicator" class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></div>
+                        <span id="connectionText" class="text-sm font-medium text-gray-700">Menghubungkan ke Google Sheets...</span>
+                    </div>
+                    <div id="lastUpdated" class="text-xs text-gray-500"></div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="refreshData()" id="refreshBtn" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2">
+                        <i class="fas fa-sync-alt" id="refreshIcon"></i>
+                        <span>Refresh</span>
+                    </button>
+                    <button onclick="showConnectionInfo()" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Advanced Search and Filter Controls -->
+            <div class="space-y-4">
+                <!-- Search Bar -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="relative flex-1">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="searchInput" placeholder="Cari nama siswa, NISN, kelas, atau rombel..." 
+                               class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full">
+                        <button onclick="clearSearch()" id="clearSearchBtn" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <!-- <button onclick="toggleAdvancedFilter()" id="advancedFilterBtn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium flex items-center gap-2">
+                        <i class="fas fa-filter"></i>
+                        <span>Filter Lanjutan</span>
+                        <i class="fas fa-chevron-down" id="filterChevron"></i>
+                    </button> -->
+                </div>
+
+                <!-- Advanced Filter Panel -->
+                <!-- <div id="advancedFilterPanel" class="hidden bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter Kelas</label>
+                            <select id="kelasFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm">
+                                <option value="">Semua Kelas</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter Rombel</label>
+                            <select id="rombelFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm">
+                                <option value="">Semua Rombel</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter Bulan</label>
+                            <select id="monthFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm">
+                                <option value="">Semua Bulan</option>
+                                <option value="01">Januari</option>
+                                <option value="02">Februari</option>
+                                <option value="03">Maret</option>
+                                <option value="04">April</option>
+                                <option value="05">Mei</option>
+                                <option value="06">Juni</option>
+                                <option value="07">Juli</option>
+                                <option value="08">Agustus</option>
+                                <option value="09">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Desember</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-4">
+                        <div class="text-sm text-gray-600">
+                            <span id="filterResultCount">0</span> data ditemukan dari <span id="totalDataCount">0</span> total data
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="clearAllFilters()" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium">
+                                <i class="fas fa-times mr-1"></i>Reset Filter
+                            </button>
+                            <button onclick="applyFilters()" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                                <i class="fas fa-check mr-1"></i>Terapkan Filter
+                            </button>
+                        </div>
+                    </div>
+                </div> -->
+
+                <!-- Controls Row -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm font-medium text-gray-700">Tampilkan:</label>
+                            <select id="itemsPerPageSelect" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="200">200</option>
+                            </select>
+                            <span class="text-sm text-gray-500">data per halaman</span>
+                        </div>
+                        
+                        <!-- Quick Stats -->
+                        <div class="hidden sm:flex items-center gap-4 text-sm text-gray-600">
+                            <div class="flex items-center gap-1">
+                                <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                                <span>Hadir: <span id="quickStatsHadir">0</span></span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                                <span>Tidak Hadir: <span id="quickStatsAbsent">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="exportToExcel()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center gap-2">
+                            <i class="fas fa-file-excel"></i>
+                            <span class="hidden sm:inline">Export Excel</span>
+                        </button>
+                        <button onclick="exportToPDF()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2">
+                            <i class="fas fa-file-pdf"></i>
+                            <span class="hidden sm:inline">Export PDF</span>
+                        </button>
+                        <button onclick="printTable()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex items-center gap-2">
+                            <i class="fas fa-print"></i>
+                            <span class="hidden sm:inline">Print</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="bg-white rounded-lg table-shadow overflow-hidden mb-6">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky-header col-no">No</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky-header col-rombel">Rombel</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky-header col-kelas">Kelas</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky-header col-nisn">NISN</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky-header col-nama">Nama Siswa</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky-header col-nama-lengkap">Nama Lengkap</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky-header col-semester">Semester</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="13 Januari">13/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="14 Januari">14/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="15 Januari">15/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="16 Januari">16/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="17 Januari">17/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="18 Januari">18/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="19 Januari">19/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="20 Januari">20/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="21 Januari">21/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="22 Januari">22/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="23 Januari">23/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="24 Januari">24/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="25 Januari">25/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="30 Januari">30/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="31 Januari">31/01</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date border-l-2 border-gray-300" title="01 Februari">01/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="03 Februari">03/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="04 Februari">04/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="05 Februari">05/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="06 Februari">06/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="07 Februari">07/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="08 Februari">08/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="10 Februari">10/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="11 Februari">11/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="12 Februari">12/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="13 Februari">13/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="14 Februari">14/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="15 Februari">15/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="17 Februari">17/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="18 Februari">18/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="19 Februari">19/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="20 Februari">20/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="21 Februari">21/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="22 Februari">22/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="24 Februari">24/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="25 Februari">25/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="26 Februari">26/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="27 Februari">27/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="28 Februari">28/02</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date border-l-2 border-gray-300" title="01 Maret">01/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="03 Maret">03/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="04 Maret">04/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="05 Maret">05/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="06 Maret">06/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="07 Maret">07/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="08 Maret">08/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="09 Maret">09/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="10 Maret">10/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="11 Maret">11/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="12 Maret">12/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="13 Maret">13/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="14 Maret">14/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="15 Maret">15/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="17 Maret">17/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="18 Maret">18/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="19 Maret">19/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="20 Maret">20/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="21 Maret">21/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="22 Maret">22/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="24 Maret">24/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="25 Maret">25/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="26 Maret">26/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="27 Maret">27/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="28 Maret">28/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="29 Maret">29/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="31 Maret">31/03</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date border-l-2 border-gray-300" title="01 April">01/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="02 April">02/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="03 April">03/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="04 April">04/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="05 April">05/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="07 April">07/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="08 April">08/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="09 April">09/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="10 April">10/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="11 April">11/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="12 April">12/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="14 April">14/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="15 April">15/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="16 April">16/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="17 April">17/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="18 April">18/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="19 April">19/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="21 April">21/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="22 April">22/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="23 April">23/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="24 April">24/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="25 April">25/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="26 April">26/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="28 April">28/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="29 April">29/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="30 April">30/04</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date border-l-2 border-gray-300" title="01 Mei">01/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="02 Mei">02/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="03 Mei">03/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="05 Mei">05/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="06 Mei">06/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="07 Mei">07/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="08 Mei">08/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="09 Mei">09/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="10 Mei">10/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="12 Mei">12/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="13 Mei">13/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="14 Mei">14/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="15 Mei">15/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="16 Mei">16/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="17 Mei">17/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="19 Mei">19/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="20 Mei">20/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="21 Mei">21/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="22 Mei">22/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="23 Mei">23/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="24 Mei">24/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="26 Mei">26/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="27 Mei">27/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="28 Mei">28/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="29 Mei">29/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="30 Mei">30/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="31 Mei">31/05</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date border-l-2 border-gray-300" title="02 Juni">02/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="03 Juni">03/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="04 Juni">04/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="05 Juni">05/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="06 Juni">06/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="07 Juni">07/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="09 Juni">09/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="10 Juni">10/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="11 Juni">11/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="12 Juni">12/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="13 Juni">13/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="14 Juni">14/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="16 Juni">16/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="17 Juni">17/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="18 Juni">18/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="19 Juni">19/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="20 Juni">20/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="21 Juni">21/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="23 Juni">23/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="24 Juni">24/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="25 Juni">25/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="26 Juni">26/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="27 Juni">27/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="28 Juni">28/06</th>
+                            <th class="px-0.5 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date" title="30 Juni">30/06</th>
+                            <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-green-50 border-l-2 border-green-300 col-summary">Hadir</th>
+                            <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-red-50 col-summary">Alpa</th>
+                            <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-yellow-50 col-summary">Sakit</th>
+                            <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-blue-50 col-summary">Izin</th>
+                            <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-purple-50 col-summary">Bolos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTable" class="bg-white divide-y divide-gray-200">
+                        <!-- Data akan dimuat dari Google Sheets -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Fixed Pagination Layout -->
+            <div class="bg-white border-t border-gray-200 px-4 py-4 sm:px-6">
+                <!-- Mobile Pagination -->
+                <div class="flex flex-col space-y-4 sm:hidden">
+                    <!-- Mobile Info -->
+                    <div class="text-center">
+                        <p class="text-sm text-gray-700 bg-gray-50 px-4 py-2 rounded-lg inline-block">
+                            <span id="showingFromMobile" class="font-semibold text-blue-600">1</span>-<span id="showingToMobile" class="font-semibold text-blue-600">10</span> dari <span id="totalRecordsMobile" class="font-semibold text-blue-600">0</span> data
+                        </p>
+                        <p class="text-xs text-gray-500 mt-2">
+                            Halaman <span id="currentPageMobile" class="font-semibold text-blue-600">1</span> dari <span id="totalPagesMobile" class="font-semibold text-gray-700">1</span>
+                        </p>
+                    </div>
+                    
+                    <!-- Mobile Navigation -->
+                    <div class="flex justify-between items-center">
+                        <button id="prevMobile" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm">
+                            <i class="fas fa-chevron-left mr-2"></i>
+                            Sebelumnya
+                        </button>
+                        <button id="nextMobile" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm">
+                            Selanjutnya
+                            <i class="fas fa-chevron-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Desktop Pagination -->
+                <div class="hidden sm:block">
+                    <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between space-y-4 xl:space-y-0">
+                        <!-- Left: Info Section -->
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:space-x-8 space-y-3 lg:space-y-0">
+                            <div class="bg-gray-50 px-4 py-2 rounded-lg">
+                                <p class="text-sm text-gray-700">
+                                    Menampilkan <span id="showingFrom" class="font-semibold text-blue-600">1</span> sampai <span id="showingTo" class="font-semibold text-blue-600">10</span> dari <span id="totalRecords" class="font-semibold text-blue-600">0</span> data
+                                </p>
+                            </div>
+                            <div class="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
+                                <div class="flex items-center space-x-2 text-sm text-gray-700">
+                                    <i class="fas fa-file-alt text-blue-500"></i>
+                                    <span>Halaman</span>
+                                    <span id="currentPageDisplay" class="font-bold text-blue-600 bg-white px-2 py-1 rounded shadow-sm">1</span>
+                                    <span>dari</span>
+                                    <span id="totalPagesDisplay" class="font-semibold text-gray-800">1</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right: Navigation Section -->
+                        <div class="flex justify-center xl:justify-end">
+                            <div class="bg-white border border-gray-200 rounded-xl p-2 shadow-sm">
+                                <nav class="flex items-center space-x-1">
+                                    <!-- First Page -->
+                                    <button id="firstPageBtn" onclick="changePage(1)" class="inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200" title="Halaman Pertama">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </button>
+                                    
+                                    <!-- Previous -->
+                                    <button id="prevBtn" class="inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200" title="Halaman Sebelumnya">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    
+                                    <!-- Page Numbers Container -->
+                                    <div id="pagination" class="flex items-center space-x-1 mx-2 min-w-0">
+                                        <!-- Pagination buttons akan dibuat dinamis -->
+                                    </div>
+                                    
+                                    <!-- Next -->
+                                    <button id="nextBtn" class="inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200" title="Halaman Selanjutnya">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                    
+                                    <!-- Last Page -->
+                                    <button id="lastPageBtn" class="inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200" title="Halaman Terakhir">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Setup Instructions -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle text-blue-600 mt-1"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">Cara Menghubungkan dengan Google Sheets:</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Buka Google Sheets Anda dan klik "Share" (Bagikan)</li>
+                            <li>Pilih "Anyone with the link can view" (Siapa saja dengan link dapat melihat)</li>
+                            <li>Pastikan struktur kolom: A=No, B=Nama, C=NISN, D=Tanggal, E=Status, F=Kelas</li>
+                            <li>Aplikasi akan otomatis memuat data dari spreadsheet Anda</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="bg-white rounded-lg card-shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-users text-blue-600"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Data</p>
+                        <p id="totalStudents" class="text-2xl font-semibold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg card-shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check text-green-600"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Status Hadir</p>
+                        <p id="attendancePercentage" class="text-2xl font-semibold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg card-shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Status Lainnya</p>
+                        <p id="totalAbsent" class="text-2xl font-semibold text-gray-900">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg card-shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-calendar-times text-red-600"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Hari Ini</p>
+                        <p id="todayDate" class="text-lg font-semibold text-gray-900">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 flex items-center space-x-3">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <span class="text-gray-700">Memuat data dari Google Sheets...</span>
+        </div>
+    </div>
+
+    <!-- Connection Info Modal -->
+    <div id="connectionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Informasi Koneksi Google Sheets</h3>
+                <button onclick="closeConnectionInfo()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div id="modalConnectionIndicator" class="w-3 h-3 rounded-full bg-green-400"></div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-900" id="modalConnectionStatus">Terhubung</div>
+                        <div class="text-xs text-gray-500" id="modalSheetInfo">Sheet ID: 1bDLMlKqiAqCpF1JIj131GTt4PNFrRCiRk8oJlobifWo</div>
+                    </div>
+                </div>
+                
+                <div class="text-sm text-gray-600">
+                    <div class="mb-2"><strong>Terakhir Diperbarui:</strong> <span id="modalLastUpdated">-</span></div>
+                    <div class="mb-2"><strong>Total Data:</strong> <span id="modalTotalData">0</span> record</div>
+                    <div class="mb-2"><strong>Status Sinkronisasi:</strong> <span id="modalSyncStatus" class="text-green-600">Aktif</span></div>
+                </div>
+                
+                <div class="border-t pt-4">
+                    <h4 class="text-sm font-medium text-gray-900 mb-2">Cara Menghubungkan:</h4>
+                    <ol class="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                        <li>Buka Google Sheets Anda</li>
+                        <li>Klik "Share" → "Anyone with the link can view"</li>
+                        <li>Salin Sheet ID dari URL</li>
+                        <li>Pastikan struktur kolom sesuai format</li>
+                    </ol>
+                </div>
+                
+                <div class="flex gap-2 pt-4">
+                    <button onclick="refreshData()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh Data
+                    </button>
+                    <button onclick="closeConnectionInfo()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration untuk Google Sheets
+        const SHEET_ID = '1bDLMlKqiAqCpF1JIj131GTt4PNFrRCiRk8oJlobifWo';
+        const SHEET_NAME = 'Sheet1'; // Ganti sesuai nama sheet Anda
+        const RANGE = 'A:EZ'; // Sesuaikan dengan kolom data Anda
+        
+        let attendanceData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let connectionStatus = 'connecting'; // connecting, connected, error
+        let lastUpdated = null;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAttendanceData();
+            updateTodayDate();
+
+            // Event listeners
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
+            document.getElementById('monthFilter').addEventListener('change', handleMonthFilter);
+            document.getElementById('itemsPerPageSelect').addEventListener('change', handleItemsPerPageChange);
+            
+            // Advanced filter event listeners
+            document.getElementById('kelasFilter').addEventListener('change', applyFilters);
+            document.getElementById('rombelFilter').addEventListener('change', applyFilters);
+            
+            document.getElementById('monthFilter').addEventListener('change', handleMonthFilter);
+        });
+
+        async function loadAttendanceData() {
+            updateConnectionStatus('connecting');
+            
+            try {
+                // Menggunakan Google Sheets sebagai CSV untuk akses publik
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+                
+                const response = await fetch(csvUrl);
+                const csvText = await response.text();
+                
+                // Parse CSV data
+                const rows = csvText.split('\n').filter(row => row.trim() !== '');
+                const headers = parseCSVRow(rows[0]);
+                
+                console.log('Headers dari Google Sheets:', headers);
+                console.log('Total kolom:', headers.length);
+                
+                // Find date columns - look for any column that might contain dates
+                // This includes columns after the basic info (No, Rombel, Kelas, NISN, Nama, Nama Lengkap, Semester)
+                const dateColumns = [];
+                const basicInfoColumns = 7; // First 7 columns are basic info
+                
+                // Check columns starting from index 7 onwards for date patterns or any attendance data
+                for (let i = basicInfoColumns; i < headers.length; i++) {
+                    const header = headers[i].trim();
+                    // Look for date patterns like "13/01", "1/2", or even just numbers that could be dates
+                    if (header && (
+                        /^\d{1,2}\/\d{1,2}$/.test(header) || // "13/01" format
+                        /^\d{1,2}-\d{1,2}$/.test(header) ||  // "13-01" format
+                        /^\d{1,2}\.\d{1,2}$/.test(header) || // "13.01" format
+                        header.includes('/') ||               // Any header with slash
+                        header.includes('-') ||               // Any header with dash
+                        (header.length <= 10 && /\d/.test(header)) // Short headers with numbers
+                    )) {
+                        dateColumns.push({
+                            index: i,
+                            date: header
+                        });
+                    }
+                }
+                
+                console.log('Kolom tanggal ditemukan:', dateColumns);
+                console.log('Jumlah kolom tanggal:', dateColumns.length);
+                
+                attendanceData = [];
+                
+                for (let i = 1; i < rows.length; i++) {
+                    const values = parseCSVRow(rows[i]);
+                    
+                    console.log(`Baris ${i}:`, values.slice(0, 10), '...'); // Log first 10 columns
+                    
+                    if (values.length >= basicInfoColumns && values[0] && values[4]) { // Pastikan ada data minimal
+                        // Extract attendance data from date columns
+                        const attendanceByDate = {};
+                        let hadir = 0, alpa = 0, sakit = 0, izin = 0, bolos = 0;
+                        
+                        dateColumns.forEach(dateCol => {
+                            const rawStatus = values[dateCol.index] || '';
+                            const normalizedStatus = normalizeStatus(rawStatus);
+                            attendanceByDate[dateCol.date] = normalizedStatus;
+                            
+                            // Count statistics from actual data
+                            switch(normalizedStatus) {
+                                case 'H': hadir++; break;
+                                case 'A': alpa++; break;
+                                case 'S': sakit++; break;
+                                case 'I': izin++; break;
+                                case 'B': bolos++; break;
+                            }
+                        });
+                        
+                        console.log(`Attendance untuk ${values[4]}:`, attendanceByDate);
+                        
+                        const rowData = {
+                            no: values[0] || i,
+                            rombel: values[1] || '',
+                            kelas: values[2] || '',
+                            nisn: values[3] || '',
+                            nama: values[4] || '',
+                            namaLengkap: values[5] || values[4] || '',
+                            semester: values[6] || '1',
+                            // Store actual attendance data by date
+                            attendanceByDate: attendanceByDate,
+                            // Calculate real summary from attendance data
+                            hadir: hadir,
+                            alpa: alpa,
+                            sakit: sakit,
+                            izin: izin,
+                            bolos: bolos
+                        };
+                        attendanceData.push(rowData);
+                    }
+                }
+                
+                // Store date columns globally for table rendering
+                window.attendanceDateColumns = dateColumns;
+                
+                filteredData = [...attendanceData];
+                lastUpdated = new Date();
+                
+                // Update connection status
+                updateConnectionStatus('connected');
+                
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').style.display = 'none';
+                
+                // Render data
+                renderTable();
+                renderPagination();
+                updateStatistics();
+                
+                console.log('Data berhasil dimuat dari Google Sheets:', attendanceData);
+                console.log('Sample attendance data:', attendanceData[0]?.attendanceByDate);
+                console.log('Total data loaded:', attendanceData.length);
+                showNotification(`Berhasil memuat ${attendanceData.length} data dari Google Sheets`, 'success');
+                
+            } catch (error) {
+                console.error('Error loading data from Google Sheets:', error);
+                
+                // Update connection status
+                updateConnectionStatus('error');
+                
+                // Fallback ke sample data jika gagal
+                attendanceData = generateSampleData();
+                filteredData = [...attendanceData];
+                lastUpdated = new Date();
+                
+                document.getElementById('loadingOverlay').style.display = 'none';
+                renderTable();
+                renderPagination();
+                updateStatistics();
+                
+                // Show error message
+                showNotification('Tidak dapat terhubung ke Google Sheets. Menampilkan data contoh.', 'error');
+            }
+        }
+
+        function parseCSVRow(row) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < row.length; i++) {
+                const char = row[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current.trim());
+            return result;
+        }
+
+        function generateSampleData() {
+            const sampleData = [];
+            const classes = ['X-1', 'X-2', 'X-3', 'XI-1', 'XI-2', 'XII-1'];
+            const rombels = ['A', 'B', 'C'];
+            const statuses = ['H', 'A', 'S', 'I', 'B'];
+            const statusWeights = [0.85, 0.05, 0.05, 0.03, 0.02]; // 85% hadir, dll
+            
+            // Generate sample date columns
+            const sampleDates = [
+                '13/01', '14/01', '15/01', '16/01', '17/01', '18/01', '19/01', '20/01', '21/01', '22/01', '23/01', '24/01', '25/01', '30/01', '31/01',
+                '01/02', '03/02', '04/02', '05/02', '06/02', '07/02', '08/02', '10/02', '11/02', '12/02', '13/02', '14/02', '15/02', '17/02', '18/02'
+            ];
+            
+            for (let i = 1; i <= 25; i++) {
+                // Generate attendance data for each date
+                const attendanceByDate = {};
+                let hadir = 0, alpa = 0, sakit = 0, izin = 0, bolos = 0;
+                
+                sampleDates.forEach(date => {
+                    const random = Math.random();
+                    let cumulative = 0;
+                    let selectedStatus = 'H';
+                    
+                    for (let j = 0; j < statuses.length; j++) {
+                        cumulative += statusWeights[j];
+                        if (random < cumulative) {
+                            selectedStatus = statuses[j];
+                            break;
+                        }
+                    }
+                    
+                    attendanceByDate[date] = selectedStatus;
+                    
+                    // Count statistics
+                    switch(selectedStatus) {
+                        case 'H': hadir++; break;
+                        case 'A': alpa++; break;
+                        case 'S': sakit++; break;
+                        case 'I': izin++; break;
+                        case 'B': bolos++; break;
+                    }
+                });
+                
+                sampleData.push({
+                    no: i,
+                    rombel: rombels[Math.floor(Math.random() * rombels.length)],
+                    kelas: classes[Math.floor(Math.random() * classes.length)],
+                    nisn: `123456789${i.toString().padStart(2, '0')}`,
+                    nama: `Siswa ${i}`,
+                    namaLengkap: `Nama Lengkap Siswa ${i}`,
+                    semester: Math.random() > 0.5 ? '1' : '2',
+                    attendanceByDate: attendanceByDate,
+                    hadir: hadir,
+                    alpa: alpa,
+                    sakit: sakit,
+                    izin: izin,
+                    bolos: bolos
+                });
+            }
+            
+            // Set sample date columns
+            window.attendanceDateColumns = sampleDates.map(date => ({date: date}));
+            
+            return sampleData;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('attendanceTable');
+            const thead = document.querySelector('thead tr');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredData.slice(startIndex, endIndex);
+
+            // Use date columns from Google Sheets or fallback to default
+            const dateColumns = window.attendanceDateColumns || [
+                {date: '13/01'}, {date: '14/01'}, {date: '15/01'}, {date: '16/01'}, {date: '17/01'}, {date: '18/01'}, {date: '19/01'}, {date: '20/01'}, {date: '21/01'}, {date: '22/01'}, {date: '23/01'}, {date: '24/01'}, {date: '25/01'}, {date: '30/01'}, {date: '31/01'},
+                {date: '01/02'}, {date: '03/02'}, {date: '04/02'}, {date: '05/02'}, {date: '06/02'}, {date: '07/02'}, {date: '08/02'}, {date: '10/02'}, {date: '11/02'}, {date: '12/02'}, {date: '13/02'}, {date: '14/02'}, {date: '15/02'}, {date: '17/02'}, {date: '18/02'}, {date: '19/02'}, {date: '20/02'}, {date: '21/02'}, {date: '22/02'}, {date: '24/02'}, {date: '25/02'}, {date: '26/02'}, {date: '27/02'}, {date: '28/02'},
+                {date: '01/03'}, {date: '03/03'}, {date: '04/03'}, {date: '05/03'}, {date: '06/03'}, {date: '07/03'}, {date: '08/03'}, {date: '09/03'}, {date: '10/03'}, {date: '11/03'}, {date: '12/03'}, {date: '13/03'}, {date: '14/03'}, {date: '15/03'}, {date: '17/03'}, {date: '18/03'}, {date: '19/03'}, {date: '20/03'}, {date: '21/03'}, {date: '22/03'}, {date: '24/03'}, {date: '25/03'}, {date: '26/03'}, {date: '27/03'}, {date: '28/03'}, {date: '29/03'}, {date: '31/03'},
+                {date: '01/04'}, {date: '02/04'}, {date: '03/04'}, {date: '04/04'}, {date: '05/04'}, {date: '07/04'}, {date: '08/04'}, {date: '09/04'}, {date: '10/04'}, {date: '11/04'}, {date: '12/04'}, {date: '14/04'}, {date: '15/04'}, {date: '16/04'}, {date: '17/04'}, {date: '18/04'}, {date: '19/04'}, {date: '21/04'}, {date: '22/04'}, {date: '23/04'}, {date: '24/04'}, {date: '25/04'}, {date: '26/04'}, {date: '28/04'}, {date: '29/04'}, {date: '30/04'},
+                {date: '01/05'}, {date: '02/05'}, {date: '03/05'}, {date: '05/05'}, {date: '06/05'}, {date: '07/05'}, {date: '08/05'}, {date: '09/05'}, {date: '10/05'}, {date: '12/05'}, {date: '13/05'}, {date: '14/05'}, {date: '15/05'}, {date: '16/05'}, {date: '17/05'}, {date: '19/05'}, {date: '20/05'}, {date: '21/05'}, {date: '22/05'}, {date: '23/05'}, {date: '24/05'}, {date: '26/05'}, {date: '27/05'}, {date: '28/05'}, {date: '29/05'}, {date: '30/05'}, {date: '31/05'},
+                {date: '02/06'}, {date: '03/06'}, {date: '04/06'}, {date: '05/06'}, {date: '06/06'}, {date: '07/06'}, {date: '09/06'}, {date: '10/06'}, {date: '11/06'}, {date: '12/06'}, {date: '13/06'}, {date: '14/06'}, {date: '16/06'}, {date: '17/06'}, {date: '18/06'}, {date: '19/06'}, {date: '20/06'}, {date: '21/06'}, {date: '23/06'}, {date: '24/06'}, {date: '25/06'}, {date: '26/06'}, {date: '27/06'}, {date: '28/06'}, {date: '30/06'}
+            ];
+
+            // Update table header with actual date columns from Google Sheets
+            if (window.attendanceDateColumns && window.attendanceDateColumns.length > 0) {
+                const dateHeaders = window.attendanceDateColumns.map((dateCol, index) => {
+                    const dateNum = dateCol.date.split('/')[0];
+                    const monthNum = dateCol.date.split('/')[1];
+                    const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                    const monthName = monthNames[parseInt(monthNum)] || 'Unknown';
+                    const borderClass = dateNum === '01' || dateNum === '1' ? 'border-l-2 border-gray-300' : '';
+                    return `<th class="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase col-date ${borderClass}" title="${dateNum} ${monthName}">${dateCol.date}</th>`;
+                }).join('');
+                
+                thead.innerHTML = `
+                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 text-center uppercase tracking-wider sticky-header col-no">
+                        <div class="flex items-center gap-1">
+                            <span>No</span>
+                            <i class="fas fa-sort text-gray-400 cursor-pointer hover:text-gray-600" onclick="sortTable('no')"></i>
+                        </div>
+                    </th>
+                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky-header col-rombel">
+                        <div class="flex items-center gap-1">
+                            <span>Rombel</span>
+                            <i class="fas fa-sort text-gray-400 cursor-pointer hover:text-gray-600" onclick="sortTable('rombel')"></i>
+                        </div>
+                    </th>
+                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky-header col-kelas">
+                        <div class="flex items-center gap-1">
+                            <span>Kelas</span>
+                            <i class="fas fa-sort text-gray-400 cursor-pointer hover:text-gray-600" onclick="sortTable('kelas')"></i>
+                        </div>
+                    </th>
+                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky-header col-nisn">
+                        <div class="flex items-center gap-1">
+                            <span>NISN</span>
+                            <i class="fas fa-sort text-gray-400 cursor-pointer hover:text-gray-600" onclick="sortTable('nisn')"></i>
+                        </div>
+                    </th>
+                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky-header col-nama">
+                        <div class="flex items-center gap-1">
+                            <span>Nama Siswa</span>
+                            <i class="fas fa-sort text-gray-400 cursor-pointer hover:text-gray-600" onclick="sortTable('nama')"></i>
+                        </div>
+                    </th>
+                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky-header col-nama-lengkap">
+                        <div class="flex items-center gap-1">
+                            <span>Nama Lengkap</span>
+                            <i class="fas fa-sort text-gray-400 cursor-pointer hover:text-gray-600" onclick="sortTable('namaLengkap')"></i>
+                        </div>
+                    </th>
+                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky-header col-semester">
+                        <div class="flex items-center gap-1">
+                            <span>Semester</span>
+                            <i class="fas fa-sort text-gray-400 cursor-pointer hover:text-gray-600" onclick="sortTable('semester')"></i>
+                        </div>
+                    </th>
+                    ${dateHeaders}
+                    <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-green-50 border-l-2 border-green-300 col-summary">
+                        <div class="flex items-center justify-center gap-1">
+                            <span>Hadir</span>
+                            <i class="fas fa-sort text-gray-400 cursor-pointer hover:text-gray-600" onclick="sortTable('hadir')"></i>
+                        </div>
+                    </th>
+                    <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-red-50 col-summary">
+                        <div class="flex items-center justify-center gap-1">
+                            <span>Alpa</span>
+                            <i class="fas fa-sort text-gray-400 cursor-pointer hover:text-gray-600" onclick="sortTable('alpa')"></i>
+                        </div>
+                    </th>
+                    <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-yellow-50 col-summary">
+                        <div class="flex items-center justify-center gap-1">
+                            <span>Sakit</span>
+                            <i class="fas fa-sort text-gray-400 cursor-pointer hover:text-gray-600" onclick="sortTable('sakit')"></i>
+                        </div>
+                    </th>
+                    <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-blue-50 col-summary">
+                        <div class="flex items-center justify-center gap-1">
+                            <span>Izin</span>
+                            <i class="fas fa-sort text-gray-400 cursor-pointer hover:text-gray-600" onclick="sortTable('izin')"></i>
+                        </div>
+                    </th>
+                    <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-purple-50 col-summary">
+                        <div class="flex items-center justify-center gap-1">
+                            <span>Bolos</span>
+                            <i class="fas fa-sort text-gray-400 cursor-pointer hover:text-gray-600" onclick="sortTable('bolos')"></i>
+                        </div>
+                    </th>
+                `;
+            }
+
+            // Show loading state if no data
+            if (pageData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="${7 + dateColumns.length + 5}" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <i class="fas fa-search text-gray-400 text-4xl mb-4"></i>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada data ditemukan</h3>
+                                <p class="text-gray-500">Coba ubah filter pencarian atau refresh data</p>
+                                <button onclick="refreshData()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-sync-alt mr-2"></i>Refresh Data
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = pageData.map((row, index) => {
+                // Generate attendance cells using real data from Google Sheets
+                const attendanceCells = dateColumns.map(dateCol => {
+                    const status = row.attendanceByDate ? row.attendanceByDate[dateCol.date] || '-' : '-';
+                    const statusClass = getStatusClass(status);
+                    const statusText = getStatusText(status);
+                    return `<td class="px-1 py-2 text-center text-xs col-date ${statusClass}" title="${statusText} - ${dateCol.date}">${status}</td>`;
+                }).join('');
+
+                const rowNumber = startIndex + index + 1;
+                const attendancePercentage = calculateAttendancePercentage(row);
+
+                return `
+                    <tr class="hover:bg-gray-50 transition-colors duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}">
+                        <td class="px-2 py-3 text-sm text-gray-900 sticky-col col-no font-medium">${rowNumber}</td>
+                        <td class="px-2 py-3 text-sm text-gray-600 sticky-col col-rombel">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                ${row.rombel || '-'}
+                            </span>
+                        </td>
+                        <td class="px-2 py-3 text-sm text-gray-600 sticky-col col-kelas">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                ${row.kelas || '-'}
+                            </span>
+                        </td>
+                        <td class="px-2 py-3 text-sm text-gray-600 font-medium sticky-col col-nisn">${row.nisn || '-'}</td>
+                        <td class="px-2 py-3 text-sm font-medium text-gray-900 sticky-col col-nama">
+                            <div class="flex items-center">
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-gray-900">${row.nama || '-'}</div>
+                                    
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-2 py-3 text-sm text-gray-600 sticky-col col-nama-lengkap">${row.namaLengkap || row.nama || '-'}</td>
+                        <td class="px-2 py-3 text-sm text-gray-600 sticky-col col-semester">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Sem ${row.semester || '1'}
+                            </span>
+                        </td>
+                        ${attendanceCells}
+                        <td class="px-2 py-3 text-center text-sm font-bold text-green-700 bg-green-50 col-summary">
+                            <div class="flex flex-col items-center">
+                                <span class="text-lg">${row.hadir || 0}</span>
+                                <span class="text-xs text-green-600">hari</span>
+                            </div>
+                        </td>
+                        <td class="px-2 py-3 text-center text-sm font-bold text-red-700 bg-red-50 col-summary">
+                            <div class="flex flex-col items-center">
+                                <span class="text-lg">${row.alpa || 0}</span>
+                                <span class="text-xs text-red-600">hari</span>
+                            </div>
+                        </td>
+                        <td class="px-2 py-3 text-center text-sm font-bold text-yellow-700 bg-yellow-50 col-summary">
+                            <div class="flex flex-col items-center">
+                                <span class="text-lg">${row.sakit || 0}</span>
+                                <span class="text-xs text-yellow-600">hari</span>
+                            </div>
+                        </td>
+                        <td class="px-2 py-3 text-center text-sm font-bold text-blue-700 bg-blue-50 col-summary">
+                            <div class="flex flex-col items-center">
+                                <span class="text-lg">${row.izin || 0}</span>
+                                <span class="text-xs text-blue-600">hari</span>
+                            </div>
+                        </td>
+                        <td class="px-2 py-3 text-center text-sm font-bold text-purple-700 bg-purple-50 col-summary">
+                            <div class="flex flex-col items-center">
+                                <span class="text-lg">${row.bolos || 0}</span>
+                                <span class="text-xs text-purple-600">hari</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            updatePaginationInfo();
+        }
+
+        function normalizeStatus(status) {
+            if (!status || status.trim() === '') return '-';
+            
+            const statusStr = status.toString().toUpperCase().trim();
+            
+            // Normalize different status formats to standard codes
+            switch(statusStr) {
+                case 'HADIR':
+                case 'H':
+                case '✓':
+                case 'PRESENT':
+                    return 'H';
+                case 'ALPA':
+                case 'A':
+                case 'ABSENT':
+                    return 'A';
+                case 'SAKIT':
+                case 'S':
+                case 'SICK':
+                    return 'S';
+                case 'IZIN':
+                case 'I':
+                case 'PERMISSION':
+                    return 'I';
+                case 'BOLOS':
+                case 'B':
+                case 'SKIP':
+                    return 'B';
+                default:
+                    return status.toString().trim() || '-';
+            }
+        }
+
+        function getStatusClass(status) {
+            const normalizedStatus = normalizeStatus(status);
+            switch(normalizedStatus) {
+                case 'H': return 'text-green-600 bg-green-50 font-semibold border border-green-200 rounded';
+                case 'A': return 'text-red-600 bg-red-50 font-semibold border border-red-200 rounded';
+                case 'S': return 'text-yellow-600 bg-yellow-50 font-semibold border border-yellow-200 rounded';
+                case 'I': return 'text-blue-600 bg-blue-50 font-semibold border border-blue-200 rounded';
+                case 'B': return 'text-purple-600 bg-purple-50 font-semibold border border-purple-200 rounded';
+                default: return 'text-gray-400 bg-gray-50 border border-gray-200 rounded';
+            }
+        }
+
+        function getStatusText(status) {
+            const normalizedStatus = normalizeStatus(status);
+            switch(normalizedStatus) {
+                case 'H': return 'Hadir';
+                case 'A': return 'Alpa';
+                case 'S': return 'Sakit';
+                case 'I': return 'Izin';
+                case 'B': return 'Bolos';
+                default: return 'Tidak ada data';
+            }
+        }
+
+        function calculateAttendancePercentage(row) {
+            const totalDays = (row.hadir || 0) + (row.alpa || 0) + (row.sakit || 0) + (row.izin || 0) + (row.bolos || 0);
+            if (totalDays === 0) return 0;
+            return Math.round(((row.hadir || 0) / totalDays) * 100);
+        }
+
+        // Sorting functionality
+        let currentSort = { field: null, direction: 'asc' };
+
+        function sortTable(field) {
+            // Toggle sort direction if clicking the same field
+            if (currentSort.field === field) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.field = field;
+                currentSort.direction = 'asc';
+            }
+
+            // Sort the filtered data
+            filteredData.sort((a, b) => {
+                let aValue = a[field] || '';
+                let bValue = b[field] || '';
+
+                // Handle numeric fields
+                if (['no', 'hadir', 'alpa', 'sakit', 'izin', 'bolos'].includes(field)) {
+                    aValue = parseInt(aValue) || 0;
+                    bValue = parseInt(bValue) || 0;
+                } else {
+                    // Handle string fields
+                    aValue = aValue.toString().toLowerCase();
+                    bValue = bValue.toString().toLowerCase();
+                }
+
+                if (currentSort.direction === 'asc') {
+                    return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+                } else {
+                    return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+                }
+            });
+
+            // Update sort icons
+            updateSortIcons();
+
+            // Reset to first page and re-render
+            currentPage = 1;
+            renderTable();
+            renderPagination();
+        }
+
+        function updateSortIcons() {
+            // Reset all sort icons
+            document.querySelectorAll('.fas.fa-sort, .fas.fa-sort-up, .fas.fa-sort-down').forEach(icon => {
+                icon.className = 'fas fa-sort text-gray-400 cursor-pointer hover:text-gray-600';
+            });
+
+            // Update the active sort icon
+            if (currentSort.field) {
+                const activeIcon = document.querySelector(`[onclick="sortTable('${currentSort.field}')"]`);
+                if (activeIcon) {
+                    if (currentSort.direction === 'asc') {
+                        activeIcon.className = 'fas fa-sort-up text-blue-600 cursor-pointer';
+                    } else {
+                        activeIcon.className = 'fas fa-sort-down text-blue-600 cursor-pointer';
+                    }
+                }
+            }
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            // Update page display info
+            document.getElementById('currentPageDisplay').textContent = currentPage;
+            document.getElementById('totalPagesDisplay').textContent = totalPages;
+            
+            // Update mobile pagination info
+            const startIndex = (currentPage - 1) * itemsPerPage + 1;
+            const endIndex = Math.min(currentPage * itemsPerPage, filteredData.length);
+            document.getElementById('showingFromMobile').textContent = startIndex;
+            document.getElementById('showingToMobile').textContent = endIndex;
+            document.getElementById('totalRecordsMobile').textContent = filteredData.length;
+            document.getElementById('currentPageMobile').textContent = currentPage;
+            document.getElementById('totalPagesMobile').textContent = totalPages;
+            
+            // Update navigation buttons
+            const firstBtn = document.getElementById('firstPageBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const lastBtn = document.getElementById('lastPageBtn');
+            const prevMobile = document.getElementById('prevMobile');
+            const nextMobile = document.getElementById('nextMobile');
+            
+            // Disable/enable buttons based on current page
+            const isFirstPage = currentPage === 1;
+            const isLastPage = currentPage === totalPages || totalPages === 0;
+            
+            firstBtn.disabled = isFirstPage;
+            prevBtn.disabled = isFirstPage;
+            nextBtn.disabled = isLastPage;
+            lastBtn.disabled = isLastPage;
+            prevMobile.disabled = isFirstPage;
+            nextMobile.disabled = isLastPage;
+            
+            // Add click handlers for navigation buttons
+            prevBtn.onclick = () => changePage(currentPage - 1);
+            nextBtn.onclick = () => changePage(currentPage + 1);
+            lastBtn.onclick = () => changePage(totalPages);
+            prevMobile.onclick = () => changePage(currentPage - 1);
+            nextMobile.onclick = () => changePage(currentPage + 1);
+            
+            // Generate smart pagination (show max 7 page numbers)
+            let paginationHTML = '';
+            const maxVisiblePages = 7;
+            
+            if (totalPages <= maxVisiblePages) {
+                // Show all pages if total is small
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationHTML += createPageButton(i, i === currentPage);
+                }
+            } else {
+                // Smart pagination with ellipsis
+                const startPage = Math.max(1, currentPage - 3);
+                const endPage = Math.min(totalPages, currentPage + 3);
+                
+                // Always show first page
+                if (startPage > 1) {
+                    paginationHTML += createPageButton(1, false);
+                    if (startPage > 2) {
+                        paginationHTML += `<span class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500">...</span>`;
+                    }
+                }
+                
+                // Show pages around current page
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationHTML += createPageButton(i, i === currentPage);
+                }
+                
+                // Always show last page
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        paginationHTML += `<span class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500">...</span>`;
+                    }
+                    paginationHTML += createPageButton(totalPages, false);
+                }
+            }
+            
+            pagination.innerHTML = paginationHTML;
+        }
+        
+        function createPageButton(pageNum, isActive) {
+            if (isActive) {
+                return `
+                    <button class="inline-flex items-center justify-center w-10 h-10 bg-blue-600 text-white text-sm font-bold rounded-lg shadow-sm border-2 border-blue-600 flex-shrink-0">
+                        ${pageNum}
+                    </button>
+                `;
+            } else {
+                return `
+                    <button onclick="changePage(${pageNum})" class="inline-flex items-center justify-center w-10 h-10 bg-white border border-gray-300 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 rounded-lg transition-all duration-200 flex-shrink-0">
+                        ${pageNum}
+                    </button>
+                `;
+            }
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderTable();
+                renderPagination();
+            }
+        }
+
+        function updatePaginationInfo() {
+            const startIndex = (currentPage - 1) * itemsPerPage + 1;
+            const endIndex = Math.min(currentPage * itemsPerPage, filteredData.length);
+            
+            document.getElementById('showingFrom').textContent = startIndex;
+            document.getElementById('showingTo').textContent = endIndex;
+            document.getElementById('totalRecords').textContent = filteredData.length;
+        }
+
+        function handleSearch() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const clearBtn = document.getElementById('clearSearchBtn');
+            
+            // Show/hide clear button
+            if (searchTerm.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+            
+            // Apply search filter
+            applyFilters();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            applyFilters();
+        }
+
+        // Advanced Filter Functions
+        function toggleAdvancedFilter() {
+            const panel = document.getElementById('advancedFilterPanel');
+            const chevron = document.getElementById('filterChevron');
+            
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                chevron.classList.remove('fa-chevron-down');
+                chevron.classList.add('fa-chevron-up');
+                populateFilterOptions();
+            } else {
+                panel.classList.add('hidden');
+                chevron.classList.remove('fa-chevron-up');
+                chevron.classList.add('fa-chevron-down');
+            }
+        }
+
+        function populateFilterOptions() {
+            // Populate Kelas filter
+            const kelasSet = new Set();
+            const rombelSet = new Set();
+            
+            attendanceData.forEach(row => {
+                if (row.kelas) kelasSet.add(row.kelas);
+                if (row.rombel) rombelSet.add(row.rombel);
+            });
+            
+            const kelasFilter = document.getElementById('kelasFilter');
+            const rombelFilter = document.getElementById('rombelFilter');
+            
+            // Clear existing options (except "Semua")
+            kelasFilter.innerHTML = '<option value="">Semua Kelas</option>';
+            rombelFilter.innerHTML = '<option value="">Semua Rombel</option>';
+            
+            // Add kelas options
+            Array.from(kelasSet).sort().forEach(kelas => {
+                const option = document.createElement('option');
+                option.value = kelas;
+                option.textContent = kelas;
+                kelasFilter.appendChild(option);
+            });
+            
+            // Add rombel options
+            Array.from(rombelSet).sort().forEach(rombel => {
+                const option = document.createElement('option');
+                option.value = rombel;
+                option.textContent = rombel;
+                rombelFilter.appendChild(option);
+            });
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const kelasFilter = document.getElementById('kelasFilter').value;
+            const rombelFilter = document.getElementById('rombelFilter').value;
+            
+            filteredData = attendanceData.filter(row => {
+                // Search filter
+                const matchesSearch = !searchTerm || 
+                    row.nama.toLowerCase().includes(searchTerm) || 
+                    row.nisn.includes(searchTerm) ||
+                    (row.kelas && row.kelas.toLowerCase().includes(searchTerm)) ||
+                    (row.rombel && row.rombel.toLowerCase().includes(searchTerm));
+                
+                // Kelas filter
+                const matchesKelas = !kelasFilter || row.kelas === kelasFilter;
+                
+                // Rombel filter
+                const matchesRombel = !rombelFilter || row.rombel === rombelFilter;
+                
+                return matchesSearch && matchesKelas && matchesRombel;
+            });
+            
+            // Update filter result count
+            document.getElementById('filterResultCount').textContent = filteredData.length;
+            document.getElementById('totalDataCount').textContent = attendanceData.length;
+            
+            // Reset to first page and re-render
+            currentPage = 1;
+            renderTable();
+            renderPagination();
+            updateStatistics();
+            updateQuickStats();
+        }
+
+        
+
+        function clearAllFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('kelasFilter').value = '';
+            document.getElementById('rombelFilter').value = '';
+            document.getElementById('monthFilter').value = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            
+            // Reset filtered data and date columns
+            filteredData = [...attendanceData];
+            window.filteredDateColumns = null;
+            
+            // Re-render with all data
+            currentPage = 1;
+            renderTable();
+            renderPagination();
+            updateStatistics();
+            updateQuickStats();
+        }
+
+        function updateQuickStats() {
+            let totalHadir = 0;
+            let totalAbsent = 0;
+            
+            filteredData.forEach(row => {
+                totalHadir += row.hadir || 0;
+                totalAbsent += (row.alpa || 0) + (row.sakit || 0) + (row.izin || 0) + (row.bolos || 0);
+            });
+            
+            document.getElementById('quickStatsHadir').textContent = totalHadir;
+            document.getElementById('quickStatsAbsent').textContent = totalAbsent;
+        }
+
+        // Print function
+        function printTable() {
+            const printWindow = window.open('', '_blank');
+            const tableHTML = document.querySelector('.table-shadow').outerHTML;
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Rekap Presensi - Print</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        table { width: 100%; border-collapse: collapse; font-size: 10px; }
+                        th, td { border: 1px solid #ddd; padding: 4px; text-align: left; }
+                        th { background-color: #f5f5f5; font-weight: bold; }
+                        .text-center { text-align: center; }
+                        .bg-green-50 { background-color: #f0f9ff; }
+                        .bg-red-50 { background-color: #fef2f2; }
+                        .bg-yellow-50 { background-color: #fffbeb; }
+                        .bg-blue-50 { background-color: #eff6ff; }
+                        .bg-purple-50 { background-color: #faf5ff; }
+                        @media print {
+                            body { margin: 0; }
+                            table { font-size: 8px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h2>Rekap Presensi Siswa</h2>
+                    <p>Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}</p>
+                    <p>Total Data: ${filteredData.length} siswa</p>
+                    ${tableHTML}
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function handleMonthFilter() {
+            const selectedMonth = document.getElementById('monthFilter').value;
+            if (selectedMonth) {
+                filteredData = attendanceData.filter(row => 
+                    row.tanggal.startsWith(selectedMonth)
+                );
+            } else {
+                filteredData = [...attendanceData];
+            }
+            currentPage = 1;
+            renderTable();
+            renderPagination();
+            updateStatistics();
+        }
+
+        function handleItemsPerPageChange() {
+            itemsPerPage = parseInt(document.getElementById('itemsPerPageSelect').value);
+            currentPage = 1; // Reset to first page
+            renderTable();
+            renderPagination();
+        }
+
+        function updateStatistics() {
+            const totalRecords = filteredData.length;
+            let totalHadirDays = 0;
+            let totalAbsentDays = 0;
+            
+            filteredData.forEach(row => {
+                totalHadirDays += row.hadir || 0;
+                totalAbsentDays += (row.alpa || 0) + (row.sakit || 0) + (row.izin || 0) + (row.bolos || 0);
+            });
+
+            document.getElementById('totalStudents').textContent = totalRecords;
+            document.getElementById('attendancePercentage').textContent = totalHadirDays;
+            document.getElementById('totalAbsent').textContent = totalAbsentDays;
+        }
+
+        function updateTodayDate() {
+            const today = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('todayDate').textContent = today.toLocaleDateString('id-ID', options);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function exportToExcel() {
+            try {
+                // Prepare data for Excel export
+                const exportData = [];
+                
+                // Use actual date columns from Google Sheets
+                const dateColumns = window.attendanceDateColumns || [];
+                const dateHeaders = dateColumns.map(col => col.date);
+                
+                // Add headers
+                const headers = [
+                    'No', 'Rombel', 'Kelas', 'NISN', 'Nama Siswa', 'Nama Lengkap', 'Semester',
+                    ...dateHeaders, // Use actual date columns from Google Sheets
+                    'Jumlah Hadir', 'Alpa', 'Sakit', 'Izin', 'Bolos'
+                ];
+                exportData.push(headers);
+                
+                // Add data rows
+                filteredData.forEach(row => {
+                    const rowData = [
+                        row.no, row.rombel || '', row.kelas || '', row.nisn || '', 
+                        row.nama || '', row.namaLengkap || row.nama || '', row.semester || '1'
+                    ];
+                    
+                    // Add attendance data using real data from Google Sheets
+                    if (dateColumns.length > 0) {
+                        // Use real attendance data
+                        dateColumns.forEach(dateCol => {
+                            const status = row.attendanceByDate ? row.attendanceByDate[dateCol.date] || '-' : '-';
+                            rowData.push(status);
+                        });
+                    }
+                    
+                    // Add summary data (real calculated values)
+                    rowData.push(
+                        row.hadir || 0,
+                        row.alpa || 0,
+                        row.sakit || 0,
+                        row.izin || 0,
+                        row.bolos || 0
+                    );
+                    
+                    exportData.push(rowData);
+                });
+                
+                // Create workbook and worksheet
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(exportData);
+                
+                // Set column widths
+                const colWidths = [
+                    {wch: 5},   // No
+                    {wch: 8},   // Rombel
+                    {wch: 8},   // Kelas
+                    {wch: 15},  // NISN
+                    {wch: 20},  // Nama Siswa
+                    {wch: 25},  // Nama Lengkap
+                    {wch: 10},  // Semester
+                ];
+                
+                // Add widths for date columns (narrow)
+                for (let i = 0; i < dateHeaders.length; i++) {
+                    colWidths.push({wch: 6});
+                }
+                
+                // Add widths for summary columns
+                colWidths.push({wch: 10}, {wch: 8}, {wch: 8}, {wch: 8}, {wch: 8});
+                
+                ws['!cols'] = colWidths;
+                
+                // Add worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, "Rekap Presensi");
+                
+                // Generate filename with current date
+                const today = new Date();
+                const dateStr = today.toISOString().split('T')[0];
+                const filename = `Rekap_Presensi_${dateStr}.xlsx`;
+                
+                // Save file
+                XLSX.writeFile(wb, filename);
+                
+                // Show success message
+                showNotification('Excel file berhasil diunduh!', 'success');
+                
+            } catch (error) {
+                console.error('Error exporting to Excel:', error);
+                showNotification('Gagal mengunduh file Excel. Silakan coba lagi.', 'error');
+            }
+        }
+
+        function exportToPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
+                
+                // Add title
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('REKAP PRESENSI SISWA', 148, 20, { align: 'center' });
+                
+                // Add date
+                const today = new Date();
+                const dateStr = today.toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Tanggal: ${dateStr}`, 148, 28, { align: 'center' });
+                
+                // Prepare table data
+                const tableHeaders = [
+                    ['No', 'Rombel', 'Kelas', 'NISN', 'Nama Siswa', 'Semester', 'Hadir', 'Alpa', 'Sakit', 'Izin', 'Bolos']
+                ];
+                
+                const tableData = filteredData.map(row => [
+                    row.no,
+                    row.rombel || '-',
+                    row.kelas || '-',
+                    row.nisn || '-',
+                    row.nama || '-',
+                    row.semester || '1',
+                    row.hadir || 0,
+                    row.alpa || 0,
+                    row.sakit || 0,
+                    row.izin || 0,
+                    row.bolos || 0
+                ]);
+                
+                // Add table
+                doc.autoTable({
+                    head: tableHeaders,
+                    body: tableData,
+                    startY: 35,
+                    styles: {
+                        fontSize: 8,
+                        cellPadding: 2,
+                    },
+                    headStyles: {
+                        fillColor: [59, 130, 246], // Blue background
+                        textColor: 255,
+                        fontStyle: 'bold'
+                    },
+                    alternateRowStyles: {
+                        fillColor: [248, 250, 252] // Light gray
+                    },
+                    columnStyles: {
+                        0: { halign: 'center', cellWidth: 15 }, // No
+                        1: { halign: 'center', cellWidth: 20 }, // Rombel
+                        2: { halign: 'center', cellWidth: 20 }, // Kelas
+                        3: { halign: 'center', cellWidth: 35 }, // NISN
+                        4: { halign: 'left', cellWidth: 60 },   // Nama
+                        5: { halign: 'center', cellWidth: 20 }, // Semester
+                        6: { halign: 'center', cellWidth: 20 }, // Hadir
+                        7: { halign: 'center', cellWidth: 15 }, // Alpa
+                        8: { halign: 'center', cellWidth: 15 }, // Sakit
+                        9: { halign: 'center', cellWidth: 15 }, // Izin
+                        10: { halign: 'center', cellWidth: 15 } // Bolos
+                    },
+                    margin: { top: 35, left: 10, right: 10 }
+                });
+                
+                // Add footer
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.text(`Halaman ${i} dari ${pageCount}`, 148, 200, { align: 'center' });
+                    doc.text('Sistem Rekap Presensi - Generated by Canva Code', 148, 205, { align: 'center' });
+                }
+                
+                // Generate filename
+                const filename = `Rekap_Presensi_${today.toISOString().split('T')[0]}.pdf`;
+                
+                // Save PDF
+                doc.save(filename);
+                
+                // Show success message
+                showNotification('PDF file berhasil diunduh!', 'success');
+                
+            } catch (error) {
+                console.error('Error exporting to PDF:', error);
+                showNotification('Gagal mengunduh file PDF. Silakan coba lagi.', 'error');
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+            
+            // Set colors based on type
+            if (type === 'success') {
+                notification.className += ' bg-green-500 text-white';
+                notification.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+            } else if (type === 'error') {
+                notification.className += ' bg-red-500 text-white';
+                notification.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
+            } else {
+                notification.className += ' bg-blue-500 text-white';
+                notification.innerHTML = `<i class="fas fa-info-circle mr-2"></i>${message}`;
+            }
+            
+            // Add to document
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Connection Status Management
+        function updateConnectionStatus(status) {
+            connectionStatus = status;
+            const indicator = document.getElementById('connectionIndicator');
+            const text = document.getElementById('connectionText');
+            const lastUpdatedEl = document.getElementById('lastUpdated');
+            const statusBar = document.getElementById('connectionStatus');
+            
+            // Update modal elements too
+            const modalIndicator = document.getElementById('modalConnectionIndicator');
+            const modalStatus = document.getElementById('modalConnectionStatus');
+            const modalLastUpdated = document.getElementById('modalLastUpdated');
+            const modalTotalData = document.getElementById('modalTotalData');
+            const modalSyncStatus = document.getElementById('modalSyncStatus');
+            
+            switch(status) {
+                case 'connecting':
+                    indicator.className = 'w-3 h-3 rounded-full bg-yellow-400 animate-pulse';
+                    text.textContent = 'Menghubungkan ke Google Sheets...';
+                    statusBar.className = 'flex items-center justify-between mb-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200';
+                    lastUpdatedEl.textContent = '';
+                    
+                    modalIndicator.className = 'w-3 h-3 rounded-full bg-yellow-400 animate-pulse';
+                    modalStatus.textContent = 'Menghubungkan...';
+                    modalSyncStatus.textContent = 'Menghubungkan...';
+                    modalSyncStatus.className = 'text-yellow-600';
+                    break;
+                    
+                case 'connected':
+                    indicator.className = 'w-3 h-3 rounded-full bg-green-400';
+                    text.textContent = 'Terhubung dengan Google Sheets';
+                    statusBar.className = 'flex items-center justify-between mb-4 p-3 rounded-lg bg-green-50 border border-green-200';
+                    
+                    if (lastUpdated) {
+                        const timeStr = lastUpdated.toLocaleTimeString('id-ID');
+                        lastUpdatedEl.textContent = `Terakhir diperbarui: ${timeStr}`;
+                        modalLastUpdated.textContent = lastUpdated.toLocaleString('id-ID');
+                    }
+                    
+                    modalIndicator.className = 'w-3 h-3 rounded-full bg-green-400';
+                    modalStatus.textContent = 'Terhubung';
+                    modalTotalData.textContent = attendanceData.length;
+                    modalSyncStatus.textContent = 'Aktif';
+                    modalSyncStatus.className = 'text-green-600';
+                    break;
+                    
+                case 'error':
+                    indicator.className = 'w-3 h-3 rounded-full bg-red-400';
+                    text.textContent = 'Gagal terhubung ke Google Sheets';
+                    statusBar.className = 'flex items-center justify-between mb-4 p-3 rounded-lg bg-red-50 border border-red-200';
+                    lastUpdatedEl.textContent = 'Menggunakan data contoh';
+                    
+                    modalIndicator.className = 'w-3 h-3 rounded-full bg-red-400';
+                    modalStatus.textContent = 'Tidak Terhubung';
+                    modalTotalData.textContent = attendanceData.length + ' (data contoh)';
+                    modalSyncStatus.textContent = 'Error';
+                    modalSyncStatus.className = 'text-red-600';
+                    break;
+            }
+        }
+
+        // Refresh Data Function
+        async function refreshData() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            const refreshIcon = document.getElementById('refreshIcon');
+            
+            // Disable button and show loading
+            refreshBtn.disabled = true;
+            refreshIcon.classList.add('animate-spin');
+            
+            try {
+                await loadAttendanceData();
+                showNotification('Data berhasil diperbarui!', 'success');
+            } catch (error) {
+                showNotification('Gagal memperbarui data. Silakan coba lagi.', 'error');
+            } finally {
+                // Re-enable button and stop loading
+                refreshBtn.disabled = false;
+                refreshIcon.classList.remove('animate-spin');
+            }
+        }
+
+        // Modal Functions
+        function showConnectionInfo() {
+            document.getElementById('connectionModal').classList.remove('hidden');
+        }
+
+        function closeConnectionInfo() {
+            document.getElementById('connectionModal').classList.add('hidden');
+        }
+
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            if (connectionStatus === 'connected') {
+                refreshData();
+            }
+        }, 5 * 60 * 1000); // 5 minutes
+
+        // Google Sheets Integration (Demo)
+        // Dalam implementasi nyata, gunakan Google Sheets API
+        function connectToGoogleSheets() {
+            // Contoh implementasi koneksi ke Google Sheets
+            const SHEET_ID = '1bDLMlKqiAqCpF1JIj131GTt4PNFrRCiRk8oJlobifWo';
+            const API_KEY = 'AIzaSyAJZCA_UFQPi_bJLPyhIX82zevOWq9BTZI'; // Ganti dengan API key Anda
+            const RANGE = 'Sheet1!A:EZ';
+            
+            // URL untuk mengakses Google Sheets API
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
+            
+            // Fetch data dari Google Sheets
+            // fetch(url)
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         // Process data dan update attendanceData
+            //         console.log('Data dari Google Sheets:', data);
+            //     })
+            //     .catch(error => {
+            //         console.error('Error:', error);
+            //     });
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96df0192f3a8ff96',t:'MTc1NDk5MTU3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
