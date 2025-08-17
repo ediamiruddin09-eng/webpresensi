@@ -181,7 +181,6 @@
     <header class="glass sticky top-0 z-40 border-b border-white/20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16 sm:h-20">
-            
             <div class="flex items-center space-x-2 sm:space-x-4">
                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
                     <i class="fas fa-user-check text-white text-sm sm:text-lg"></i>
@@ -203,7 +202,7 @@
                     <div id="statusIndicator" class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     <span id="statusText">Live</span>
                     <span id="lastUpdate" class="text-xs text-gray-400"></span>
-                    <!-- <span id="nextRefresh" class="text-xs text-blue-400"></span> -->
+                    <span id="nextRefresh" class="text-xs text-blue-400"></span>
                 </div>
                 <button onclick="checkCard()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
                     <i class="fas fa-id-card text-sm"></i>
@@ -295,7 +294,7 @@
         </div>
 
         <!-- Filter Section -->
-        <!-- <div class="bg-white rounded-xl p-6 card-shadow mb-8 animate-fade-in border border-gray-100">
+<!--          <div class="bg-white rounded-xl p-6 card-shadow mb-8 animate-fade-in border border-gray-100">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div class="flex flex-col md:flex-row gap-4">
                     <div>
@@ -333,21 +332,21 @@
                         </select>
                     </div>
                 </div>
-                <div class="flex gap-3"> -->
+                <div class="flex gap-3">  -->
                     <!-- <button onclick="manualRefresh()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
                         <i id="refreshIcon" class="fas fa-sync-alt"></i>
                         Refresh
                     </button> -->
-                    <!-- <button onclick="exportData()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+<!--                      <button onclick="exportData()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
                         <i class="fas fa-download"></i>
                         Export CSV
                     </button>
                 </div>
             </div>
-        </div> -->
+        </div>  -->
 
         <!-- Rekap Kelas Display -->
-        <!-- <div id="classRekapDisplay" class="bg-white rounded-xl card-shadow mb-8 animate-fade-in border border-gray-100 hidden">
+        <div id="classRekapDisplay" class="bg-white rounded-xl card-shadow mb-8 animate-fade-in border border-gray-100 hidden">
             <div class="p-6 border-b border-gray-200">
                 <h2 class="text-xl font-bold text-gray-800 flex items-center">
                     <i class="fas fa-chart-bar mr-2 text-green-600"></i>
@@ -355,11 +354,11 @@
                 </h2>
             </div>
             <div class="p-6">
-                <div id="classRekapContent" class="grid grid-cols-2 md:grid-cols-5 gap-4"> -->
+                <div id="classRekapContent" class="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <!-- Content will be populated here -->
-                <!-- </div>
+                </div>
             </div>
-        </div> -->
+        </div>
 
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -552,7 +551,7 @@
         // Variabel global
         
         let allData = [];
-        // let filteredData = [];
+        let filteredData = [];
         let lastDataCount = 0;
         let refreshInterval;
         let countdownInterval;
@@ -682,7 +681,7 @@ async function fetchDataFromSheets(showLoading = false) {
             
             // Panggil fungsi-fungsi lain untuk update tampilan
             updateStatistics();
-            // populateFilters();
+            populateFilters();
             displayRecentAttendance(); // Fungsi ini akan menerima allData yang sudah terurut BARU ke LAMA
             displayPeriodRecap();
             
@@ -723,7 +722,88 @@ async function fetchDataFromSheets(showLoading = false) {
             document.getElementById('totalTerlambat').textContent = terlambat;
         }
         
+        // Fungsi untuk mengisi filter
+        function populateFilters() {
+            const kelasSet = new Set(allData.map(item => item.kelas).filter(kelas => kelas));
+            const filterKelas = document.getElementById('filterKelas');
+            const rekapKelas = document.getElementById('rekapKelas');
+            
+            // Clear existing options
+            while (filterKelas.children.length > 1) {
+                filterKelas.removeChild(filterKelas.lastChild);
+            }
+            while (rekapKelas.children.length > 1) {
+                rekapKelas.removeChild(rekapKelas.lastChild);
+            }
+            
+            // Add new options
+            Array.from(kelasSet).sort().forEach(kelas => {
+                const option1 = document.createElement('option');
+                option1.value = kelas;
+                option1.textContent = kelas;
+                filterKelas.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = kelas;
+                option2.textContent = kelas;
+                rekapKelas.appendChild(option2);
+            });
+        }
         
+        // Fungsi untuk menampilkan rekap kelas
+        function displayClassRecap(selectedClass) {
+            const display = document.getElementById('classRekapDisplay');
+            const content = document.getElementById('classRekapContent');
+            const className = document.getElementById('selectedClassName');
+            
+            if (!selectedClass) {
+                display.classList.add('hidden');
+                return;
+            }
+            
+            const classData = allData.filter(item => item.kelas === selectedClass);
+            
+            if (classData.length === 0) {
+                display.classList.add('hidden');
+                return;
+            }
+            
+            const stats = {
+                hadir: classData.filter(item => item.keterangan.toLowerCase().includes('hadir')).length,
+                alpa: classData.filter(item => item.keterangan.toLowerCase().includes('alpa')).length,
+                sakit: classData.filter(item => item.keterangan.toLowerCase().includes('sakit')).length,
+                izin: classData.filter(item => item.keterangan.toLowerCase().includes('izin')).length,
+                terlambat: classData.filter(item => item.keterangan.toLowerCase().includes('terlambat')).length
+            };
+            
+            stats.total = stats.hadir + stats.alpa + stats.sakit + stats.izin + stats.terlambat;
+            
+            className.textContent = selectedClass;
+            content.innerHTML = `
+                <div class="text-center p-4 bg-green-50 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600">${stats.hadir}</div>
+                    <div class="text-sm text-gray-600">Hadir</div>
+                </div>
+                <div class="text-center p-4 bg-red-50 rounded-lg">
+                    <div class="text-2xl font-bold text-red-600">${stats.alpa}</div>
+                    <div class="text-sm text-gray-600">Alpa</div>
+                </div>
+                <div class="text-center p-4 bg-purple-50 rounded-lg">
+                    <div class="text-2xl font-bold text-purple-600">${stats.sakit}</div>
+                    <div class="text-sm text-gray-600">Sakit</div>
+                </div>
+                <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                    <div class="text-2xl font-bold text-yellow-600">${stats.izin}</div>
+                    <div class="text-sm text-gray-600">Izin</div>
+                </div>
+                <div class="text-center p-4 bg-blue-50 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600">${stats.total}</div>
+                    <div class="text-sm text-gray-600">Total</div>
+                </div>
+            `;
+            
+            display.classList.remove('hidden');
+        }
         
         
          // Fungsi untuk menampilkan riwayat presensi terbaru
@@ -971,31 +1051,31 @@ async function fetchDataFromSheets(showLoading = false) {
             showToast('Data berhasil diekspor!', 'success');
         }
         
-        // // Event listeners untuk filter
-        // document.getElementById('filterDate').addEventListener('change', () => {
-        //     displayRecentAttendance();
-        //     displayPeriodRecap();
-        // });
+        // Event listeners untuk filter
+        document.getElementById('filterDate').addEventListener('change', () => {
+            displayRecentAttendance();
+            displayPeriodRecap();
+        });
         
-        // document.getElementById('filterMonth').addEventListener('change', () => {
-        //     displayRecentAttendance();
-        //     displayPeriodRecap();
-        // });
+        document.getElementById('filterMonth').addEventListener('change', () => {
+            displayRecentAttendance();
+            displayPeriodRecap();
+        });
         
-        // document.getElementById('filterKelas').addEventListener('change', () => {
-        //     displayRecentAttendance();
-        //     displayPeriodRecap();
-        // });
+        document.getElementById('filterKelas').addEventListener('change', () => {
+            displayRecentAttendance();
+            displayPeriodRecap();
+        });
         
-        // document.getElementById('rekapKelas').addEventListener('change', (e) => {
-        //     displayClassRecap(e.target.value);
-        // });
+        document.getElementById('rekapKelas').addEventListener('change', (e) => {
+            displayClassRecap(e.target.value);
+        });
         
         // Fungsi untuk update status koneksi
         function updateConnectionStatus(status, text) {
             const indicator = document.getElementById('statusIndicator');
             const statusText = document.getElementById('statusText');
-            // const lastUpdate = document.getElementById('lastUpdate');
+            const lastUpdate = document.getElementById('lastUpdate');
             
             // Reset classes
             indicator.className = 'w-2 h-2 rounded-full status-indicator';
@@ -1062,18 +1142,44 @@ async function fetchDataFromSheets(showLoading = false) {
         }
         
         // Fungsi untuk update waktu saat ini
-        // function updateCurrentTime() {
-        //     const currentTimeElement = document.getElementById('currentTime');
-        //     const now = new Date();
-        //     const timeString = now.toLocaleTimeString('id-ID', {
-        //         hour: '2-digit',
-        //         minute: '2-digit',
-        //         second: '2-digit'
-        //     });
-        //     currentTimeElement.textContent = timeString;
-        // }
+        function updateCurrentTime() {
+            const currentTimeElement = document.getElementById('currentTime');
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            currentTimeElement.textContent = timeString;
+        }
         
-        
+        // Fungsi untuk memulai auto refresh
+        function startAutoRefresh() {
+            // Clear existing intervals if any
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            // Set next refresh time
+            nextRefreshTime = new Date(Date.now() + refreshRate);
+            
+            // Start auto refresh every 10 seconds
+            refreshInterval = setInterval(() => {
+                console.log('Auto refresh triggered at:', new Date().toLocaleTimeString());
+                nextRefreshTime = new Date(Date.now() + refreshRate);
+                
+                fetchDataFromSheets().catch(error => {
+                    console.error('Auto refresh failed:', error);
+                    // Don't stop auto refresh on error, just log it
+                });
+            }, refreshRate);
+            
+            console.log('Auto refresh started - will update every', refreshRate/1000, 'seconds');
+            showToast(`Auto refresh aktif - update setiap ${refreshRate/1000} detik`, 'info', 2000);
+        }
         
         // Fungsi untuk refresh manual
         function manualRefresh() {
@@ -1125,7 +1231,7 @@ async function fetchDataFromSheets(showLoading = false) {
             consecutiveErrors = 0; // Reset error counter
             updateConnectionStatus('online', 'Kembali online');
             showToast('Koneksi internet kembali normal', 'success');
-            // startAutoRefresh();
+            startAutoRefresh();
         });
         
         window.addEventListener('offline', () => {
@@ -1139,44 +1245,57 @@ async function fetchDataFromSheets(showLoading = false) {
         });
         
         // Fungsi untuk update countdown
-        // function updateCountdown() {
-        //     const nextRefreshElement = document.getElementById('nextRefresh');
-        //     if (nextRefreshTime && refreshInterval) {
-        //         const now = new Date();
-        //         const timeLeft = Math.max(0, Math.ceil((nextRefreshTime - now) / 1000));
+        function updateCountdown() {
+            const nextRefreshElement = document.getElementById('nextRefresh');
+            if (nextRefreshTime && refreshInterval) {
+                const now = new Date();
+                const timeLeft = Math.max(0, Math.ceil((nextRefreshTime - now) / 1000));
                 
-        //         if (timeLeft > 0) {
-        //             nextRefreshElement.textContent = `• refresh dalam ${timeLeft}s`;
-        //         } else {
-        //             nextRefreshElement.textContent = '• sedang refresh...';
-        //         }
-        //     } else {
-        //         nextRefreshElement.textContent = '';
-        //     }
-        // }
+                if (timeLeft > 0) {
+                    nextRefreshElement.textContent = `• refresh dalam ${timeLeft}s`;
+                } else {
+                    nextRefreshElement.textContent = '• sedang refresh...';
+                }
+            } else {
+                nextRefreshElement.textContent = '';
+            }
+        }
         
-       
+        // Update waktu setiap detik
+        setInterval(() => {
+            updateCurrentTime();
+            updateLastUpdateTime();
+            updateCountdown();
+        }, 1000);
         
         // Inisialisasi
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing system...');
             manualRefresh();
             document.getElementById('refreshButton').addEventListener('click', manualRefresh);
-            // updateCurrentTime();
+            updateCurrentTime();
             updateConnectionStatus('loading', 'Memuat...');
             
             // Load data pertama kali dan mulai auto refresh
             fetchDataFromSheets(true).then(() => {
                 console.log('Initial data loaded successfully');
-                // startAutoRefresh();
+                startAutoRefresh();
                 
-                
+                // Show welcome toast after successful initialization
+                setTimeout(() => {
+                    showToast('Sistem presensi siap digunakan! Data akan ter-refresh otomatis setiap 10 detik.', 'success');
+                }, 500);
             }).catch(error => {
                 console.error('Failed to load initial data:', error);
                 updateConnectionStatus('error', 'Gagal memuat data awal');
                 showToast('Gagal memuat data awal. Mencoba ulang...', 'error');
                 
-               
+                // Retry after 5 seconds
+                setTimeout(() => {
+                    fetchDataFromSheets(true).then(() => {
+                        startAutoRefresh();
+                    });
+                }, 5000);
             });
         });
         
@@ -1187,12 +1306,12 @@ async function fetchDataFromSheets(showLoading = false) {
             // DOM is already loaded
             console.log('DOM already loaded, initializing system...');
             
-            // updateCurrentTime();
+            updateCurrentTime();
             updateConnectionStatus('loading', 'Memuat...');
             
             fetchDataFromSheets(true).then(() => {
                 console.log('Initial data loaded successfully');
-                // startAutoRefresh();
+                startAutoRefresh();
                 
                 setTimeout(() => {
                     showToast('Sistem presensi siap digunakan! Data akan ter-refresh otomatis setiap 10 detik.', 'success');
@@ -1204,7 +1323,7 @@ async function fetchDataFromSheets(showLoading = false) {
                 
                 setTimeout(() => {
                     fetchDataFromSheets(true).then(() => {
-                        // startAutoRefresh();
+                        startAutoRefresh();
                     });
                 }, 5000);
             });
