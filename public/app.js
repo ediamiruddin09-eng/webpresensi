@@ -1,63 +1,57 @@
-// ===== KONEKSI REAL-TIME DENGAN SOCKET.IO =====
+// File: public/app.js
 
-// 1. Hubungkan klien ke server Socket.IO
+// ===== KONEKSI REAL-TIME DENGAN SOCKET.IO =====
 const socket = io();
 
 socket.on('connect', () => {
-    console.log('Terhubung ke server dengan ID:', socket.id);
-    updateConnectionStatus('online', 'Terhubung ke server real-time');
+    console.log('Terhubung ke server real-time.');
+    // Anda bisa update status koneksi di UI di sini
 });
 
-// 2. INI BAGIAN KUNCI: Dengarkan event 'update_data' dari server
+// Ini adalah bagian terpenting: Mendengarkan pesan dari server
 socket.on('update_data', (data) => {
-    console.log('Pesan diterima dari server:', data.message);
-    showToast('Data baru diterima, memperbarui tampilan...', 'info');
+    console.log('Notifikasi data baru diterima dari server!');
+    // Tampilkan notifikasi kecil ke pengguna (opsional)
+    showToast('Memperbarui data secara otomatis...', 'info');
 
-    // Panggil fungsi untuk mengambil dan menampilkan data terbaru
-    // Kita bisa menggunakan kembali fungsi manualRefresh atau yang lebih sederhana
-    fetchAndDisplayData(true); 
+    // Panggil fungsi untuk mengambil data terbaru dan memperbarui tampilan
+    fetchAndDisplayData(); 
 });
 
 socket.on('disconnect', () => {
-    console.log('Koneksi ke server terputus.');
-    updateConnectionStatus('error', 'Koneksi real-time terputus');
+    console.error('Koneksi ke server real-time terputus.');
+    // Anda bisa update status koneksi di UI di sini
 });
 
 
-// ===== FUNGSI-FUNGSI LAINNYA =====
+// ===== FUNGSI UTAMA =====
 
-// Buat fungsi baru yang ringkas untuk fetch dan display
-async function fetchAndDisplayData(showSpinner = false) {
-    if (showSpinner) {
-        // Logika untuk menampilkan spinner bisa ditambahkan di sini
-    }
+// Fungsi untuk mengambil data dan menampilkan (Anda sudah punya ini)
+async function fetchAndDisplayData() {
     try {
-        // fetchDataFromSheets() adalah fungsi yang sudah Anda miliki
-        await fetchDataFromSheets(showSpinner);
+        // Fungsi `fetchDataFromSheets` Anda tetap sama
+        await fetchDataFromSheets();
     } catch (error) {
-        console.error("Gagal memperbarui data setelah notifikasi:", error);
-    } finally {
-        // Logika untuk menyembunyikan spinner
+        console.error("Gagal memperbarui data:", error);
     }
 }
 
-// Fungsi refresh manual sekarang hanya perlu memanggil fetchAndDisplayData
+// Fungsi refresh manual sekarang lebih sederhana
 function manualRefresh() {
     console.log("Refresh manual dipicu.");
-    showToast('Memperbarui data secara manual...', 'info');
-    fetchAndDisplayData(true);
+    showToast('Memuat ulang data...', 'info');
+    fetchAndDisplayData();
 }
 
-// ... (Sisa fungsi Anda yang lain seperti displayRecentAttendance, getStatusInfo, dll., tetap sama) ...
+// ... (Semua fungsi helper Anda yang lain seperti displayRecentAttendance, getStatusInfo, dll., tetap di sini) ...
 
 
 // ===== INISIALISASI APLIKASI =====
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Hubungkan tombol refresh
+    // Hubungkan tombol refresh manual
     document.getElementById('refreshButton').addEventListener('click', manualRefresh);
 
-    // Lakukan pengambilan data PERTAMA KALI saat halaman dibuka
+    // Lakukan pengambilan data pertama kali saat halaman dibuka
     console.log("Memuat data awal...");
-    fetchAndDisplayData(true);
+    fetchAndDisplayData();
 });
