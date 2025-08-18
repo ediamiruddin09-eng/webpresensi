@@ -1152,33 +1152,7 @@ async function fetchDataFromSheets(showLoading = false) {
             currentTimeElement.textContent = timeString;
         }
         
-        // Fungsi untuk memulai auto refresh
-        function startAutoRefresh() {
-            // Clear existing intervals if any
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-            }
-            if (countdownInterval) {
-                clearInterval(countdownInterval);
-            }
-            
-            // Set next refresh time
-            nextRefreshTime = new Date(Date.now() + refreshRate);
-            
-            // Start auto refresh every 10 seconds
-            refreshInterval = setInterval(() => {
-                console.log('Auto refresh triggered at:', new Date().toLocaleTimeString());
-                nextRefreshTime = new Date(Date.now() + refreshRate);
-                
-                fetchDataFromSheets().catch(error => {
-                    console.error('Auto refresh failed:', error);
-                    // Don't stop auto refresh on error, just log it
-                });
-            }, refreshRate);
-            
-            console.log('Auto refresh started - will update every', refreshRate/1000, 'seconds');
-            showToast(`Auto refresh aktif - update setiap ${refreshRate/1000} detik`, 'info', 2000);
-        }
+       
         
         // Fungsi untuk refresh manual
         function manualRefresh() {
@@ -1230,7 +1204,7 @@ async function fetchDataFromSheets(showLoading = false) {
             consecutiveErrors = 0; // Reset error counter
             updateConnectionStatus('online', 'Kembali online');
             showToast('Koneksi internet kembali normal', 'success');
-            startAutoRefresh();
+            // startAutoRefresh();
         });
         
         window.addEventListener('offline', () => {
@@ -1260,12 +1234,7 @@ async function fetchDataFromSheets(showLoading = false) {
             }
         }
         
-        // Update waktu setiap detik
-        setInterval(() => {
-            updateCurrentTime();
-            updateLastUpdateTime();
-            updateCountdown();
-        }, 1000);
+        
         
         // Inisialisasi
         document.addEventListener('DOMContentLoaded', function() {
@@ -1277,7 +1246,7 @@ async function fetchDataFromSheets(showLoading = false) {
             // Load data pertama kali dan mulai auto refresh
             fetchDataFromSheets(true).then(() => {
                 console.log('Initial data loaded successfully');
-                startAutoRefresh();
+                // startAutoRefresh();
                 
                 // Show welcome toast after successful initialization
                 setTimeout(() => {
@@ -1291,7 +1260,7 @@ async function fetchDataFromSheets(showLoading = false) {
                 // Retry after 5 seconds
                 setTimeout(() => {
                     fetchDataFromSheets(true).then(() => {
-                        startAutoRefresh();
+                        // startAutoRefresh();
                     });
                 }, 5000);
             });
@@ -1309,7 +1278,7 @@ async function fetchDataFromSheets(showLoading = false) {
             
             fetchDataFromSheets(true).then(() => {
                 console.log('Initial data loaded successfully');
-                startAutoRefresh();
+                // startAutoRefresh();
                 
                 setTimeout(() => {
                     showToast('Sistem presensi siap digunakan! Data akan ter-refresh otomatis setiap 10 detik.', 'success');
@@ -1321,7 +1290,7 @@ async function fetchDataFromSheets(showLoading = false) {
                 
                 setTimeout(() => {
                     fetchDataFromSheets(true).then(() => {
-                        startAutoRefresh();
+                        // startAutoRefresh();
                     });
                 }, 5000);
             });
