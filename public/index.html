@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Presensi Siswa</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -204,12 +204,12 @@
                     <span id="lastUpdate" class="text-xs text-gray-400"></span>
                     <span id="nextRefresh" class="text-xs text-blue-400"></span>
                 </div>
-                <button onclick="checkCard()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+                <button onclick="checkCard()" class="btn-primary btn-touch text-white px-3 sm:px-6 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base">
                     <i class="fas fa-id-card text-sm"></i>
                     <span class="hidden sm:inline">Cek Kartu Presensi</span>
                     <span class="sm:hidden">Cek</span>
                 </button>
-                <button id="refreshButton" onclick="manualRefresh()" class="btn-touch bg-white text-blue-600 hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-blue-200">
+                <button onclick="manualRefresh()" class="btn-touch bg-white text-blue-600 hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-blue-200">
                         <i id="refreshIcon" class="fas fa-sync-alt"></i>
                         <span class="hidden sm:inline">Refresh</span>
                         <span class="sm:hidden">Ref</span>
@@ -294,7 +294,7 @@
         </div>
 
         <!-- Filter Section -->
-<!--          <div class="bg-white rounded-xl p-6 card-shadow mb-8 animate-fade-in border border-gray-100">
+        <div class="bg-white rounded-xl p-6 card-shadow mb-8 animate-fade-in border border-gray-100">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div class="flex flex-col md:flex-row gap-4">
                     <div>
@@ -332,18 +332,18 @@
                         </select>
                     </div>
                 </div>
-                <div class="flex gap-3">  -->
+                <div class="flex gap-3">
                     <!-- <button onclick="manualRefresh()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
                         <i id="refreshIcon" class="fas fa-sync-alt"></i>
                         Refresh
                     </button> -->
-<!--                      <button onclick="exportData()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+                    <button onclick="exportData()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
                         <i class="fas fa-download"></i>
                         Export CSV
                     </button>
                 </div>
             </div>
-        </div>  -->
+        </div>
 
         <!-- Rekap Kelas Display -->
         <div id="classRekapDisplay" class="bg-white rounded-xl card-shadow mb-8 animate-fade-in border border-gray-100 hidden">
@@ -540,7 +540,6 @@
             </div>
         </div>
     </footer>
-    
 
     <script>
         // Konfigurasi Google Sheets
@@ -549,7 +548,6 @@
         const RANGE = 'Sheet1!A:O';
         
         // Variabel global
-        
         let allData = [];
         let filteredData = [];
         let lastDataCount = 0;
@@ -560,7 +558,7 @@
         let lastUpdateTime = null;
         let refreshRate = 10000; // 10 detik default
         let nextRefreshTime = null;
-        // let refreshIntervalId; // Variabel global untuk menyimpan ID dari setInterval
+        let refreshIntervalId; // Variabel global untuk menyimpan ID dari setInterval
         
         // Toast Notification System
         function showToast(message, type = 'success', duration = 3000) {
@@ -1190,7 +1188,7 @@ async function fetchDataFromSheets(showLoading = false) {
             nextRefreshTime = new Date(Date.now() + refreshRate);
             
             fetchDataFromSheets(true).then(() => {
-                showToast('Data berhasil diperbarui!', 'success', 2000);
+                showToast('Data berhasil diperbarui secara manual!', 'success', 2000);
             }).catch(error => {
                 showToast('Gagal memperbarui data. Coba lagi.', 'error');
             }).finally(() => {
@@ -1271,8 +1269,7 @@ async function fetchDataFromSheets(showLoading = false) {
         // Inisialisasi
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing system...');
-            manualRefresh();
-            document.getElementById('refreshButton').addEventListener('click', manualRefresh);
+            
             updateCurrentTime();
             updateConnectionStatus('loading', 'Memuat...');
             
