@@ -1,63 +1,32 @@
-// ===== KONEKSI REAL-TIME DENGAN SOCKET.IO =====
+// Di dalam file app.js di repositori GitHub Anda
 
-// 1. Hubungkan klien ke server Socket.IO
-const socket = io();
+// Ganti fungsi lama dengan ini
+async function fetchDataFromSheets(showLoading = false) {
+  if (showLoading) {
+    // ... logika menampilkan loading
+  }
 
-socket.on('connect', () => {
-    console.log('Terhubung ke server dengan ID:', socket.id);
-    updateConnectionStatus('online', 'Terhubung ke server real-time');
-});
+  // Panggil API Vercel Anda
+  const apiUrl = 'https://presensi-6t143joeh-edisetiawans-projects.vercel.app/api/data';
 
-// 2. INI BAGIAN KUNCI: Dengarkan event 'update_data' dari server
-socket.on('update_data', (data) => {
-    console.log('Pesan diterima dari server:', data.message);
-    showToast('Data baru diterima, memperbarui tampilan...', 'info');
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
 
-    // Panggil fungsi untuk mengambil dan menampilkan data terbaru
-    // Kita bisa menggunakan kembali fungsi manualRefresh atau yang lebih sederhana
-    fetchAndDisplayData(true); 
-});
+    // Proses data seperti biasa...
+    // ... (kode Anda untuk mem-parsing data.values, .reverse(), .map(), dll.)
 
-socket.on('disconnect', () => {
-    console.log('Koneksi ke server terputus.');
-    updateConnectionStatus('error', 'Koneksi real-time terputus');
-});
-
-
-// ===== FUNGSI-FUNGSI LAINNYA =====
-
-// Buat fungsi baru yang ringkas untuk fetch dan display
-async function fetchAndDisplayData(showSpinner = false) {
-    if (showSpinner) {
-        // Logika untuk menampilkan spinner bisa ditambahkan di sini
-    }
-    try {
-        // fetchDataFromSheets() adalah fungsi yang sudah Anda miliki
-        await fetchDataFromSheets(showSpinner);
-    } catch (error) {
-        console.error("Gagal memperbarui data setelah notifikasi:", error);
-    } finally {
-        // Logika untuk menyembunyikan spinner
-    }
+  } catch (error) {
+    // ... logika menangani error
+  }
 }
 
-// Fungsi refresh manual sekarang hanya perlu memanggil fetchAndDisplayData
-function manualRefresh() {
-    console.log("Refresh manual dipicu.");
-    showToast('Memperbarui data secara manual...', 'info');
-    fetchAndDisplayData(true);
-}
+// Pastikan Anda tetap memiliki setInterval untuk auto-refresh
+setInterval(() => {
+    fetchDataFromSheets(false);
+}, 10000); // refresh setiap 10 detik
 
-// ... (Sisa fungsi Anda yang lain seperti displayRecentAttendance, getStatusInfo, dll., tetap sama) ...
-
-
-// ===== INISIALISASI APLIKASI =====
-
+// Panggil saat halaman pertama kali dimuat
 document.addEventListener('DOMContentLoaded', () => {
-    // Hubungkan tombol refresh
-    document.getElementById('refreshButton').addEventListener('click', manualRefresh);
-
-    // Lakukan pengambilan data PERTAMA KALI saat halaman dibuka
-    console.log("Memuat data awal...");
-    fetchAndDisplayData(true);
+    fetchDataFromSheets(true);
 });
