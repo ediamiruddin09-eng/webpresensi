@@ -1271,18 +1271,18 @@ async function fetchDataFromSheets(showLoading = false) {
         }
         
         // Update waktu setiap detik
-        setInterval(() => {
-            updateCurrentTime();
-            updateLastUpdateTime();
-            updateCountdown();
-        }, 1000);
+        // setInterval(() => {
+        //     updateCurrentTime();
+        //     updateLastUpdateTime();
+        //     updateCountdown();
+        // }, 1000);
         
         // Inisialisasi
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing system...');
             manualRefresh();
             document.getElementById('refreshButton').addEventListener('click', manualRefresh);
-            updateCurrentTime();
+            // updateCurrentTime();
             updateConnectionStatus('loading', 'Memuat...');
             
             // Load data pertama kali dan mulai auto refresh
@@ -1315,7 +1315,7 @@ async function fetchDataFromSheets(showLoading = false) {
             // DOM is already loaded
             console.log('DOM already loaded, initializing system...');
             
-            updateCurrentTime();
+            // updateCurrentTime();
             updateConnectionStatus('loading', 'Memuat...');
             
             fetchDataFromSheets(true).then(() => {
