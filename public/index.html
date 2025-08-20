@@ -359,28 +359,29 @@
         </div>
 
         <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Riwayat Presensi Terbaru -->
-            <div class="bg-white rounded-xl card-shadow animate-fade-in border border-gray-100">
-                <div class="p-6 border-b border-gray-200">
-                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                        <i class="fas fa-history mr-2 text-blue-600"></i>
-                        Riwayat Presensi Terbaru
-                        <span class="ml-2 text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded-full">10 Data Terbaru</span>
-                    </h2>
-                </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 p-4">
+        <div class="bg-white rounded-xl card-shadow animate-fade-in border border-gray-100">
+            <div class="p-4 sm:p-6 border-b border-gray-200">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-history mr-2 text-blue-600"></i>
+                    Riwayat Presensi Terbaru
+                    <span class="ml-2 text-xs sm:text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded-full whitespace-nowrap">
+                        10 Data Terbaru
+                    </span>
+                </h2>
+            </div>
+            
+            <div class="p-4 sm:p-6">
+                <div id="recentAttendance" class="space-y-3">
+                    </div>
                 
-                <div class="p-6">
-                    <div id="recentAttendance" class="space-y-3">
-                        <!-- Data akan dimuat di sini -->
-                    </div>
-                    
-                    <div id="noRecentData" class="text-center py-8 hidden">
-                        <i class="fas fa-inbox text-3xl text-gray-400 mb-3"></i>
-                        <p class="text-gray-500">Belum ada data presensi terbaru</p>
-                    </div>
+                <div id="noRecentData" class="text-center py-6 sm:py-8 hidden">
+                    <i class="fas fa-inbox text-2xl sm:text-3xl text-gray-400 mb-3"></i>
+                    <p class="text-sm sm:text-base text-gray-500">Belum ada data presensi terbaru</p>
                 </div>
             </div>
+        </div>
+    </div>
 
             <!-- Rekap Berdasarkan Tanggal dan Bulan -->
             <div class="bg-white rounded-xl card-shadow animate-fade-in border border-gray-100">
