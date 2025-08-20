@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -1149,7 +1150,7 @@ async function fetchDataFromSheets(showLoading = false) {
                 return `${days} hari lalu`;
             }
         }
-
+        
         // Fungsi untuk update waktu saat ini
         function updateCurrentTime() {
             const currentTimeElement = document.getElementById('currentTime');
@@ -1161,7 +1162,6 @@ async function fetchDataFromSheets(showLoading = false) {
             });
             currentTimeElement.textContent = timeString;
         }
-        
         
         // Fungsi untuk memulai auto refresh
         function startAutoRefresh() {
@@ -1177,19 +1177,19 @@ async function fetchDataFromSheets(showLoading = false) {
             nextRefreshTime = new Date(Date.now() + refreshRate);
             
             // Start auto refresh every 10 seconds
-        //     refreshInterval = setInterval(() => {
-        //         console.log('Auto refresh triggered at:', new Date().toLocaleTimeString());
-        //         nextRefreshTime = new Date(Date.now() + refreshRate);
+            refreshInterval = setInterval(() => {
+                console.log('Auto refresh triggered at:', new Date().toLocaleTimeString());
+                nextRefreshTime = new Date(Date.now() + refreshRate);
                 
-        //         fetchDataFromSheets().catch(error => {
-        //             console.error('Auto refresh failed:', error);
-        //             Don't stop auto refresh on error, just log it
-        //         });
-        //     }, refreshRate);
+                fetchDataFromSheets().catch(error => {
+                    console.error('Auto refresh failed:', error);
+                    // Don't stop auto refresh on error, just log it
+                });
+            }, refreshRate);
             
-        //     console.log('Auto refresh started - will update every', refreshRate/1000, 'seconds');
-        //     showToast(`Auto refresh aktif - update setiap ${refreshRate/1000} detik`, 'info', 2000);
-        // }
+            console.log('Auto refresh started - will update every', refreshRate/1000, 'seconds');
+            showToast(`Auto refresh aktif - update setiap ${refreshRate/1000} detik`, 'info', 2000);
+        }
         
         // Fungsi untuk refresh manual
         function manualRefresh() {
@@ -1272,21 +1272,19 @@ async function fetchDataFromSheets(showLoading = false) {
         }
         
         // Update waktu setiap detik
-        // setInterval(() => {
-        //     updateCurrentTime();
-        //     updateLastUpdateTime();
-        //     updateCountdown();
-        // }, 1000);
+        setInterval(() => {
+            updateCurrentTime();
+            updateLastUpdateTime();
+            updateCountdown();
+        }, 1000);
         
         // Inisialisasi
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing system...');        
+            console.log('DOM loaded, initializing system...');
             manualRefresh();
-            document.getElementById('refreshButton').addEventListener('click', manualRefresh);            
-    // Panggil fungsi setelah DOM dimuat
-    updateCurrentTime();
+            document.getElementById('refreshButton').addEventListener('click', manualRefresh);
+            updateCurrentTime();
             updateConnectionStatus('loading', 'Memuat...');
-            
             
             // Load data pertama kali dan mulai auto refresh
             fetchDataFromSheets(true).then(() => {
