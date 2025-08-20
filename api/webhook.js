@@ -1,51 +1,27 @@
-const { Server } = require("socket.io");
+// File: /api/webhook.js
 
-// Simpan instance Socket.IO secara global
-let io;
+const Pusher = require('pusher');
 
-// Inisialisasi Socket.IO
-function initSocketIO(server) {
-  if (!io) {
-    io = new Server(server, {
-      cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-      }
+// Inisialisasi Pusher dengan kredensial Anda dari Environment Variables
+const pusher = new Pusher({
+  appId: process.env.PUSHER_APP_ID,
+  key: process.env.PUSHER_KEY,
+  secret: process.env.PUSHER_SECRET,
+  cluster: process.env.PUSHER_CLUSTER,
+  useTLS: true
+});
+
+export default async function handler(request, response) {
+  if (request.method === 'POST') {
+    console.log('Webhook diterima! Memicu event ke Pusher...');
+
+    // Memicu event bernama 'data-updated' di channel 'presensi-channel'
+    await pusher.trigger('presensi-channel', 'data-updated', {
+      message: "Ada data presensi baru!"
     });
 
-    io.on('connection', (socket) => {
-      console.log('Seorang pengguna terhubung:', socket.id);
-      
-      socket.on('disconnect', () => {
-        console.log('Pengguna terputus:', socket.id);
-      });
-    });
-  }
-  return io;
-}
-
-module.exports = async (req, res) => {
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  if (req.method === 'POST') {
-    console.log('Webhook diterima dari Google Sheets!');
-    
-    // Dapatkan instance Socket.IO
-    const server = require('http').createServer();
-    const ioInstance = initSocketIO(server);
-    
-    // Kirim update ke semua client
-    ioInstance.emit('update_data', { 
-      message: 'Ada data baru dari Google Sheets!',
-      timestamp: new Date().toISOString()
-    });
-
-    res.status(200).send('Notifikasi diterima.');
+    response.status(200).send('Webhook diterima dan event Pusher dipicu.');
   } else {
-    res.status(405).send('Method not allowed');
+    response.status(405).send('Method Not Allowed');
   }
-};
+}
