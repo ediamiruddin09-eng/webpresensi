@@ -1151,16 +1151,16 @@ async function fetchDataFromSheets(showLoading = false) {
         }
         
         // Fungsi untuk update waktu saat ini
-        // function updateCurrentTime() {
-        //     const currentTimeElement = document.getElementById('currentTime');
-        //     const now = new Date();
-        //     const timeString = now.toLocaleTimeString('id-ID', {
-        //         hour: '2-digit',
-        //         minute: '2-digit',
-        //         second: '2-digit'
-        //     });
-        //     currentTimeElement.textContent = timeString;
-        // }
+        function updateCurrentTime() {
+            const currentTimeElement = document.getElementById('currentTime');
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            currentTimeElement.textContent = timeString;
+        }
         
         // Fungsi untuk memulai auto refresh
         function startAutoRefresh() {
@@ -1271,18 +1271,18 @@ async function fetchDataFromSheets(showLoading = false) {
         }
         
         // Update waktu setiap detik
-        // setInterval(() => {
-        //     updateCurrentTime();
-        //     updateLastUpdateTime();
-        //     updateCountdown();
-        // }, 1000);
+        setInterval(() => {
+            updateCurrentTime();
+            updateLastUpdateTime();
+            updateCountdown();
+        }, 1000);
         
         // Inisialisasi
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing system...');
             manualRefresh();
             document.getElementById('refreshButton').addEventListener('click', manualRefresh);
-            // updateCurrentTime();
+            updateCurrentTime();
             updateConnectionStatus('loading', 'Memuat...');
             
             // Load data pertama kali dan mulai auto refresh
@@ -1315,7 +1315,7 @@ async function fetchDataFromSheets(showLoading = false) {
             // DOM is already loaded
             console.log('DOM already loaded, initializing system...');
             
-            // updateCurrentTime();
+            updateCurrentTime();
             updateConnectionStatus('loading', 'Memuat...');
             
             fetchDataFromSheets(true).then(() => {
