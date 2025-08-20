@@ -1150,17 +1150,7 @@ async function fetchDataFromSheets(showLoading = false) {
             }
         }
         
-        // Fungsi untuk update waktu saat ini
-        // function updateCurrentTime() {
-        //     const currentTimeElement = document.getElementById('currentTime');
-        //     const now = new Date();
-        //     const timeString = now.toLocaleTimeString('id-ID', {
-        //         hour: '2-digit',
-        //         minute: '2-digit',
-        //         second: '2-digit'
-        //     });
-        //     currentTimeElement.textContent = timeString;
-        // }
+        
         
         // Fungsi untuk memulai auto refresh
         function startAutoRefresh() {
@@ -1280,10 +1270,34 @@ async function fetchDataFromSheets(showLoading = false) {
         // Inisialisasi
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing system...');
+            // Fungsi untuk update waktu saat ini
+                function updateCurrentTime() {
+                    const currentTimeElement = document.getElementById('currentTime');
+                    const now = new Date();
+                    const timeString = now.toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+        
+        // Cek apakah elemen ditemukan
+        if (currentTimeElement) {
+            currentTimeElement.textContent = timeString;
+        } else {
+            console.error("Elemen dengan ID 'currentTime' tidak ditemukan.");
+        }
+    }
+
+    // Panggil fungsi setelah DOM dimuat
+    updateCurrentTime();
+
+    // Opsional: Jika Anda ingin waktu terus ter-update setiap detik
+    setInterval(updateCurrentTime, 1000);
             manualRefresh();
             document.getElementById('refreshButton').addEventListener('click', manualRefresh);
-            updateCurrentTime();
+            
             updateConnectionStatus('loading', 'Memuat...');
+            
             
             // Load data pertama kali dan mulai auto refresh
             fetchDataFromSheets(true).then(() => {
