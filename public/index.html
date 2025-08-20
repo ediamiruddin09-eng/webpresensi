@@ -359,14 +359,16 @@
         </div>
 
         <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 px-2 sm:px-4">
             <!-- Riwayat Presensi Terbaru -->
-            <div class="bg-white rounded-xl card-shadow animate-fade-in border border-gray-100">
-                <div class="p-6 border-b border-gray-200">
-                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+            <div class="bg-white rounded-xl card-shadow animate-fade-in border border-gray-100 w-full max-w-full">
+                <div class="p-4 sm:p-6 border-b border-gray-200">
+                    <h2 class="text-lg sm:text-xl font-bold text-gray-800 flex items-center flex-wrap">
                         <i class="fas fa-history mr-2 text-blue-600"></i>
                         Riwayat Presensi Terbaru
-                        <span class="ml-2 text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded-full">10 Data Terbaru</span>
+                        <span class="ml-2 mt-1 sm:mt-0 text-xs sm:text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                            10 Data Terbaru
+                        </span>
                     </h2>
                 </div>
                 
@@ -874,9 +876,9 @@ async function fetchDataFromSheets(showLoading = false) {
                                 </div>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-sm font-medium text-gray-900 mb-1">${formatDate(item.tanggal)}</div>
-                            <div class="text-sm text-gray-500 flex items-center justify-end">
+                        <div class="text-left sm:text-right mt-2 sm:mt-0">
+                            <div class="text-xs sm:text-sm font-medium text-gray-900 mb-1">${formatDate(item.tanggal)}</div>
+                            <div class="text-xs sm:text-sm text-gray-500 flex items-center sm:justify-end">
                                 <i class="fas fa-clock mr-1"></i>
                                 ${item.jam}
                             </div>
