@@ -933,7 +933,7 @@ async function fetchDataFromSheets(showLoading = false) {
                 badgeText = 'Terlambat';
             } else {
                 badgeClass = 'bg-gray-100 text-gray-800';
-                badgeText = 'Unknown';
+                badgeText = 'Bolos';
             }
             
             return `<span class="px-2 py-1 text-xs font-medium rounded-full ${badgeClass}">${badgeText}</span>`;
@@ -1019,7 +1019,7 @@ async function fetchDataFromSheets(showLoading = false) {
             if (ket.includes('izin')) return 'I';
             if (ket.includes('sakit')) return 'S';
             if (ket.includes('terlambat')) return '⏰';
-            return '?';
+            return 'B';
         }
         
         // Fungsi untuk cek kartu presensi
