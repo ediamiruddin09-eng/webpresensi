@@ -1151,16 +1151,16 @@ async function fetchDataFromSheets(showLoading = false) {
         }
         
         // Fungsi untuk update waktu saat ini
-        function updateCurrentTime() {
-            const currentTimeElement = document.getElementById('currentTime');
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('id-ID', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            currentTimeElement.textContent = timeString;
-        }
+        // function updateCurrentTime() {
+        //     const currentTimeElement = document.getElementById('currentTime');
+        //     const now = new Date();
+        //     const timeString = now.toLocaleTimeString('id-ID', {
+        //         hour: '2-digit',
+        //         minute: '2-digit',
+        //         second: '2-digit'
+        //     });
+        //     currentTimeElement.textContent = timeString;
+        // }
         
         // Fungsi untuk memulai auto refresh
         function startAutoRefresh() {
