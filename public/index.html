@@ -9,7 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         /* Loading Screen Styles */
-/*         #loadingScreen {
+        #loadingScreen {
             position: fixed;
             top: 0;
             left: 0;
@@ -112,7 +112,17 @@
                 transform: scale(1);
             }
         }
-         */
+
+        /* Hide main content initially */
+        #mainContent {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        #mainContent.show {
+            opacity: 1;
+        }
+        
 
 
 
@@ -257,8 +267,9 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen">
+    
     <!-- Loading Screen -->
-<!--     <div id="loadingScreen">
+    <div id="loadingScreen">
         <div class="loading-content">
             <div class="loading-logo">
                 <i class="fas fa-qrcode"></i>
@@ -272,7 +283,10 @@
                 <div class="loading-dot"></div>
             </div>
         </div>
-    </div> -->
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent">
     <!-- Toast Container -->
     <div id="toastContainer" class="toast-container"></div>
     
@@ -669,6 +683,7 @@
             </div>
         </div>
     </footer>
+    </div>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="app.js"></script>
