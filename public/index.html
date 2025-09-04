@@ -863,7 +863,7 @@ async function fetchDataFromSheets(showLoading = false) {
             updateStatistics();
             // populateFilters();
             displayRecentAttendance(); // Fungsi ini akan menerima allData yang sudah terurut BARU ke LAMA
-            displayPeriodRecap();
+            // displayPeriodRecap();
             
             updateConnectionStatus('online', 'Terhubung');
         } else {
@@ -1116,64 +1116,64 @@ async function fetchDataFromSheets(showLoading = false) {
 
         
         // Fungsi untuk menampilkan rekap periode
-        function displayPeriodRecap() {
-            const container = document.getElementById('periodRecap');
-            const noDataMessage = document.getElementById('noPeriodData');
+        // function displayPeriodRecap() {
+        //     const container = document.getElementById('periodRecap');
+        //     const noDataMessage = document.getElementById('noPeriodData');
             
             // Grup data berdasarkan bulan
-            const periodData = {};
-            allData.forEach(item => {
-                if (!item.tanggal) return;
+        //     const periodData = {};
+        //     allData.forEach(item => {
+        //         if (!item.tanggal) return;
                 
-                const period = item.bulan || item.tanggal.substring(0, 7);
+        //         const period = item.bulan || item.tanggal.substring(0, 7);
                 
-                if (!periodData[period]) {
-                    periodData[period] = {
-                        hadir: 0,
-                        alpa: 0,
-                        sakit: 0,
-                        izin: 0,
-                        terlambat: 0,
-                        total: 0
-                    };
-                }
+        //         if (!periodData[period]) {
+        //             periodData[period] = {
+        //                 hadir: 0,
+        //                 alpa: 0,
+        //                 sakit: 0,
+        //                 izin: 0,
+        //                 terlambat: 0,
+        //                 total: 0
+        //             };
+        //         }
                 
-                const ket = item.keterangan.toLowerCase();
-                if (ket.includes('hadir')) periodData[period].hadir++;
-                else if (ket.includes('alpa')) periodData[period].alpa++;
-                else if (ket.includes('sakit')) periodData[period].sakit++;
-                else if (ket.includes('izin')) periodData[period].izin++;
-                else if (ket.includes('terlambat')) periodData[period].terlambat++;
+        //         const ket = item.keterangan.toLowerCase();
+        //         if (ket.includes('hadir')) periodData[period].hadir++;
+        //         else if (ket.includes('alpa')) periodData[period].alpa++;
+        //         else if (ket.includes('sakit')) periodData[period].sakit++;
+        //         else if (ket.includes('izin')) periodData[period].izin++;
+        //         else if (ket.includes('terlambat')) periodData[period].terlambat++;
                 
-                periodData[period].total++;
-            });
+        //         periodData[period].total++;
+        //     });
             
-            if (Object.keys(periodData).length === 0) {
-                container.classList.add('hidden');
-                noDataMessage.classList.remove('hidden');
-                return;
-            }
+        //     if (Object.keys(periodData).length === 0) {
+        //         container.classList.add('hidden');
+        //         noDataMessage.classList.remove('hidden');
+        //         return;
+        //     }
             
-            container.classList.remove('hidden');
-            noDataMessage.classList.add('hidden');
-            container.innerHTML = '';
+        //     container.classList.remove('hidden');
+        //     noDataMessage.classList.add('hidden');
+        //     container.innerHTML = '';
             
-            Object.entries(periodData).forEach(([period, data]) => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
+        //     Object.entries(periodData).forEach(([period, data]) => {
+        //         const row = document.createElement('tr');
+        //         row.className = 'hover:bg-gray-50';
                 
-                row.innerHTML = `
-                    <td class="px-4 py-3 font-medium text-gray-800">${period}</td>
-                    <td class="px-4 py-3 text-green-600 font-medium">${data.hadir}</td>
-                    <td class="px-4 py-3 text-red-600 font-medium">${data.alpa}</td>
-                    <td class="px-4 py-3 text-purple-600 font-medium">${data.sakit}</td>
-                    <td class="px-4 py-3 text-yellow-600 font-medium">${data.izin}</td>
-                    <td class="px-4 py-3 font-bold text-gray-800">${data.total}</td>
-                `;
+        //         row.innerHTML = `
+        //             <td class="px-4 py-3 font-medium text-gray-800">${period}</td>
+        //             <td class="px-4 py-3 text-green-600 font-medium">${data.hadir}</td>
+        //             <td class="px-4 py-3 text-red-600 font-medium">${data.alpa}</td>
+        //             <td class="px-4 py-3 text-purple-600 font-medium">${data.sakit}</td>
+        //             <td class="px-4 py-3 text-yellow-600 font-medium">${data.izin}</td>
+        //             <td class="px-4 py-3 font-bold text-gray-800">${data.total}</td>
+        //         `;
                 
-                container.appendChild(row);
-            });
-        }
+        //         container.appendChild(row);
+        //     });
+        // }
         
         // Fungsi helper untuk status
         function getStatusClass(keterangan) {
@@ -1238,24 +1238,24 @@ async function fetchDataFromSheets(showLoading = false) {
         }
         
         // Event listeners untuk filter
-        document.getElementById('filterDate').addEventListener('change', () => {
-            displayRecentAttendance();
-            displayPeriodRecap();
-        });
+        // document.getElementById('filterDate').addEventListener('change', () => {
+        //     displayRecentAttendance();
+        //     displayPeriodRecap();
+        // });
         
-        document.getElementById('filterMonth').addEventListener('change', () => {
-            displayRecentAttendance();
-            displayPeriodRecap();
-        });
+        // document.getElementById('filterMonth').addEventListener('change', () => {
+        //     displayRecentAttendance();
+        //     displayPeriodRecap();
+        // });
         
-        document.getElementById('filterKelas').addEventListener('change', () => {
-            displayRecentAttendance();
-            displayPeriodRecap();
-        });
+        // document.getElementById('filterKelas').addEventListener('change', () => {
+        //     displayRecentAttendance();
+        //     displayPeriodRecap();
+        // });
         
-        document.getElementById('rekapKelas').addEventListener('change', (e) => {
-            displayClassRecap(e.target.value);
-        });
+        // document.getElementById('rekapKelas').addEventListener('change', (e) => {
+        //     displayClassRecap(e.target.value);
+        // });
         
         // Fungsi untuk update status koneksi
         function updateConnectionStatus(status, text) {
