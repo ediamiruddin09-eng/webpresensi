@@ -7,7 +7,7 @@
     <title>Sistem Presensi Siswa</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
 
          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -378,7 +378,7 @@
 <!--         Dashboard statistik baru  -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-24 flex items-center">
-                <div class="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div class="w-12 h-12 bg-danger/10 rounded-lg flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-check text-success text-lg"></i>
                 </div>
                 <div class="ml-3 min-w-0 flex-1">
@@ -500,57 +500,7 @@
     </div>
 </div>
 
-        <!-- Filter Section -->
-<!--  <div class="bg-white rounded-xl p-6 card-shadow mb-8 animate-fade-in border border-gray-100">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter Tanggal</label>
-                        <input type="date" id="filterDate" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter Bulan</label>
-                        <select id="filterMonth" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Semua Bulan</option>
-                            <option value="01">Januari</option>
-                            <option value="02">Februari</option>
-                            <option value="03">Maret</option>
-                            <option value="04">April</option>
-                            <option value="05">Mei</option>
-                            <option value="06">Juni</option>
-                            <option value="07">Juli</option>
-                            <option value="08">Agustus</option>
-                            <option value="09">September</option>
-                            <option value="10">Oktober</option>
-                            <option value="11">November</option>
-                            <option value="12">Desember</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter Kelas</label>
-                        <select id="filterKelas" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Semua Kelas</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Rekap Per Kelas</label>
-                        <select id="rekapKelas" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Pilih Kelas untuk Rekap</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex gap-3">   -->
-                    <!-- <button onclick="manualRefresh()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
-                        <i id="refreshIcon" class="fas fa-sync-alt"></i>
-                        Refresh
-                    </button> -->
-<!--                      <button onclick="exportData()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
-                        <i class="fas fa-download"></i>
-                        Export CSV
-                    </button>
-                </div>
-            </div>
-        </div>   -->
+        
 
         <!-- Rekap Kelas Display -->
         <div id="classRekapDisplay" class="bg-white p-6 animate-fade-in rounded-lg shadow-sm border border-gray-200 hidden">
@@ -592,159 +542,117 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Rekap Berdasarkan Tanggal dan Bulan -->
-<!--             <div class="bg-white rounded-xl card-shadow animate-fade-in border border-gray-100">
-                <div class="p-6 border-b border-gray-200">
-                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                        <i class="fas fa-calendar-alt mr-2 text-purple-600"></i>
-                        Rekap Presensi Berdasarkan Periode
-                    </h2>
-                </div>
-                
-                <div class="p-6">
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Periode</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hadir</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alpa</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sakit</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Izin</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody id="periodRecap" class="bg-white divide-y divide-gray-200"> -->
-                                <!-- Data akan dimuat di sini -->
-<!--                             </tbody>
-                        </table>
-                    </div>
-                    
-                    <div id="noPeriodData" class="text-center py-8 hidden">
-                        <i class="fas fa-calendar-times text-3xl text-gray-400 mb-3"></i>
-                        <p class="text-gray-500">Belum ada data rekap periode</p>
-                    </div> -->
+            
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <!-- <footer class="bg-white border-t border-gray-200 mt-16">
-        <div class="container mx-auto px-6 py-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                    <h3 class="text-lg font-bold mb-4 text-gray-800">Sistem Presensi Siswa</h3>
-                    <p class="text-gray-600">Sistem monitoring kehadiran siswa secara real-time dengan teknologi modern.</p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold mb-4 text-gray-800">Fitur</h3>
-                    <ul class="text-gray-600 space-y-2">
-                        <li><i class="fas fa-check mr-2 text-green-500"></i>Real-time Updates</li>
-                        <li><i class="fas fa-check mr-2 text-green-500"></i>Rekap Otomatis</li>
-                        <li><i class="fas fa-check mr-2 text-green-500"></i>Export Data</li>
-                        <li><i class="fas fa-check mr-2 text-green-500"></i>Multi Filter</li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold mb-4 text-gray-800">Informasi</h3>
-                    <div class="text-gray-600 space-y-2">
-                        <p><i class="fas fa-clock mr-2 text-blue-500"></i>Update setiap detik</p>
-                        <p><i class="fas fa-database mr-2 text-blue-500"></i>Data dari Google Sheets</p>
-                        <p><i class="fas fa-shield-alt mr-2 text-blue-500"></i>Aman & Terpercaya</p>
-                    </div>
-                </div>
-            </div>
-            <div class="border-t border-gray-200 mt-8 pt-8 text-center text-gray-500">
-                <p>&copy; 2024 Sistem Presensi Siswa. Dibuat dengan ❤️ untuk pendidikan.</p>
-            </div>
-        </div>
+    
     </footer> -->
     <!-- Footer dengan gradient -->
-    <footer class="bg-gradient-to-r from-lime-600 via-emerald-700 to-green-900 text-white py-12 mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="px-6 py-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- School Info -->
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center space-x-3 mb-4">
-                        <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-clipboard-check text-white"></i>
+                        <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-graduation-cap text-white text-lg"></i>
                         </div>
-                        <h4 class="text-xl font-bold">Sistem Presensi Digital</h4>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">SMA Negeri 1 Jakarta</h3>
+                            <p class="text-sm text-gray-500">Sistem Presensi Digital</p>
+                        </div>
                     </div>
-                    <p class="text-gray-300 mb-4 leading-relaxed">
-                        Platform manajemen presensi modern yang terintegrasi dengan Google Sheets untuk monitoring kehadiran siswa secara real-time dengan teknologi terdepan.
+                    <p class="text-sm text-gray-600 mb-4">
+                        Sistem presensi digital yang memudahkan monitoring kehadiran siswa secara real-time dengan teknologi modern dan user-friendly interface.
                     </p>
                     <div class="flex space-x-4">
-                        <a href="#" class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
-                            <i class="fab fa-facebook-f"></i>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+                            <i class="fab fa-facebook-f text-lg"></i>
                         </a>
-                        <a href="#" class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
-                            <i class="fab fa-twitter"></i>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+                            <i class="fab fa-twitter text-lg"></i>
                         </a>
-                        <a href="#" class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors">
-                            <i class="fab fa-instagram"></i>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+                            <i class="fab fa-instagram text-lg"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+                            <i class="fab fa-youtube text-lg"></i>
                         </a>
                     </div>
                 </div>
-                
+
+                <!-- Quick Links -->
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Fitur Utama</h4>
-                    <ul class="space-y-2 text-gray-300">
+                    <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Fitur Utama</h4>
+                    <ul class="space-y-3">
                         <li class="flex items-center space-x-2">
                             <i class="fas fa-check text-green-400 text-sm"></i>
-                            <span>Monitoring Real-time</span>
+                            <span class="text-sm text-gray-600">Monitoring Real-time</span>
                         </li>
                         <li class="flex items-center space-x-2">
                             <i class="fas fa-check text-green-400 text-sm"></i>
-                            <span>Rekap Otomatis</span>
+                            <span class="text-sm text-gray-600">Terintegrasi WhatsAapp</span>
                         </li>
                         <li class="flex items-center space-x-2">
                             <i class="fas fa-check text-green-400 text-sm"></i>
-                            <span>Statistik Lengkap</span>
+                            <span class="text-sm text-gray-600">Rekap Presensi</span>
                         </li>
                         <li class="flex items-center space-x-2">
                             <i class="fas fa-check text-green-400 text-sm"></i>
-                            <span>Export Data</span>
+                            <span class="text-sm text-gray-600">Statistik Lengkap</span>
                         </li>
-                        <li class="flex items-center space-x-2">
-                            <i class="fas fa-check text-green-400 text-sm"></i>
-                            <span>Multi-platform</span>
+                        
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Kontak</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-gray-400 w-4 mt-1 mr-3"></i>
+                            <span class="text-sm text-gray-600">
+                                Jl. Pendidikan No. 123<br>
+                                Jakarta Pusat, DKI Jakarta 10110
+                            </span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone text-gray-400 w-4 mr-3"></i>
+                            <span class="text-sm text-gray-600">(021) 1234-5678</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope text-gray-400 w-4 mr-3"></i>
+                            <span class="text-sm text-gray-600">info@sman1jakarta.sch.id</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-globe text-gray-400 w-4 mr-3"></i>
+                            <span class="text-sm text-gray-600">www.sman1jakarta.sch.id</span>
                         </li>
                     </ul>
                 </div>
-                
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Kontak & Support</h4>
-                    <div class="space-y-3 text-gray-300">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-envelope text-blue-400"></i>
-                            <span>admin@sekolah.edu</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-phone text-blue-400"></i>
-                            <span>(021) 123-4567</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-map-marker-alt text-blue-400"></i>
-                            <span>Jakarta, Indonesia</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-clock text-blue-400"></i>
-                            <span>24/7 Support</span>
+            </div>
+
+            <!-- Bottom Footer -->
+            <div class="border-t border-gray-200 mt-8 pt-6">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="flex items-center space-x-6 mb-4 md:mb-0">
+                        <p class="text-sm text-gray-500">
+                            © 2025 SMA Negeri 1 Jakarta. All rights reserved.
+                        </p>
+                        <div class="flex items-center space-x-4">
+                            <a href="#" class="text-sm text-gray-500 hover:text-primary transition-colors">Privacy Policy</a>
+                            <span class="text-gray-300">|</span>
+                            <a href="#" class="text-sm text-gray-500 hover:text-primary transition-colors">Terms of Service</a>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="border-t border-white/10 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-300 text-sm">
-                    &copy; 2024 Sistem Presensi Digital. Dibuat dengan <i class="fas fa-heart text-red-400 mx-1"></i> untuk pendidikan Indonesia.
-                </p>
-                <div class="flex space-x-6 mt-4 md:mt-0 text-sm text-gray-300">
-                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
-                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
-                    <a href="#" class="hover:text-white transition-colors">Help Center</a>
+                    <div class="flex items-center space-x-2 text-sm text-gray-500">
+                        <i class="fas fa-code text-primary"></i>
+                        <span>Powered by</span>
+                        <span class="font-medium text-primary">EduTech Solutions</span>
+                    </div>
                 </div>
             </div>
         </div>
