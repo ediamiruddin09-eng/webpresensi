@@ -354,11 +354,11 @@
                     <span class="hidden sm:inline">Cek Kartu Presensi</span>
                     <span class="sm:hidden">Kartu</span>
                 </button>
-                <button id="refreshButton" onclick="manualRefresh()" class="btn-touch bg-white text-blue-600 hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-blue-200">
+<!--                 <button id="refreshButton" onclick="manualRefresh()" class="btn-touch bg-white text-blue-600 hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-blue-200">
                         <i id="refreshIcon" class="fas fa-sync-alt"></i>
                         <span class="hidden sm:inline">Refresh</span>
                         <span class="sm:hidden">Ref</span>
-                    </button>
+                </button> -->
                  
             </div>
         </div>
@@ -438,68 +438,7 @@
                 </div>
             </div>
         </div>
-        <!-- Dashboard Statistik -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-    <div class="bg-white p-6 animate-fade-in rounded-lg shadow-sm border border-gray-200">
-        <div class="flex items-center">
-            <div class="w-12 h-12 flex items-center justify-center rounded-full bg-green-50 text-green-600">
-                <i class="fas fa-user-check text-xl"></i>
-            </div>
-            <div class="ml-4">
-                <p class="text-gray-500 text-sm font-medium">Total Hadir</p>
-                <p id="totalHadir" class="text-2xl font-bold text-gray-800">0</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="bg-white p-6 animate-fade-in rounded-lg shadow-sm border border-gray-200">
-        <div class="flex items-center">
-            <div class="w-12 h-12 flex items-center justify-center rounded-full bg-red-50 text-red-600">
-                <i class="fas fa-user-times text-xl"></i>
-            </div>
-            <div class="ml-4">
-                <p class="text-gray-500 text-sm font-medium">Total Alpa</p>
-                <p id="totalAlpa" class="text-2xl font-bold text-gray-800">0</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="bg-white p-6 animate-fade-in rounded-lg shadow-sm border border-gray-200">
-        <div class="flex items-center">
-            <div class="w-12 h-12 flex items-center justify-center rounded-full bg-purple-50 text-purple-600">
-                <i class="fas fa-user-injured text-xl"></i>
-            </div>
-            <div class="ml-4">
-                <p class="text-gray-500 text-sm font-medium">Total Sakit</p>
-                <p id="totalSakit" class="text-2xl font-bold text-gray-800">0</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="bg-white p-6 animate-fade-in rounded-lg shadow-sm border border-gray-200">
-        <div class="flex items-center">
-            <div class="w-12 h-12 flex items-center justify-center rounded-full bg-yellow-50 text-yellow-600">
-                <i class="fas fa-user-clock text-xl"></i>
-            </div>
-            <div class="ml-4">
-                <p class="text-gray-500 text-sm font-medium">Total Izin</p>
-                <p id="totalIzin" class="text-2xl font-bold text-gray-800">0</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="bg-white p-6 animate-fade-in rounded-lg shadow-sm border border-gray-200">
-        <div class="flex items-center">
-            <div class="w-12 h-12 flex items-center justify-center rounded-full bg-orange-50 text-orange-600">
-                <i class="fas fa-clock text-xl"></i>
-            </div>
-            <div class="ml-4">
-                <p class="text-gray-500 text-sm font-medium">Total Terlambat</p>
-                <p id="totalTerlambat" class="text-2xl font-bold text-gray-800">0</p>
-            </div>
-        </div>
-    </div>
-</div>
+        
 
         
 
@@ -549,10 +488,10 @@
         </div>
     </div>
     
-        <!-- Footer dengan gradient -->
-    <footer class="bg-white border-t border-gray-200 py-12 mt-16">
-        <div class="px-6 py-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <!-- Footer dengan gradient -->
+    <footer class="bg-white border-t border-gray-200 mt-12 py-8">                            
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">     
                 <!-- School Info -->
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center space-x-3 mb-4">
@@ -560,7 +499,7 @@
                             <i class="fas fa-graduation-cap text-white text-lg"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900">SMA Negeri 1 Jakarta</h3>
+                            <h3 class="text-lg font-semibold text-gray-900">UPT SMP NEGERI 1 SUPPA</h3>
                             <p class="text-sm text-gray-500">Sistem Presensi Digital</p>
                         </div>
                     </div>
@@ -572,7 +511,7 @@
                             <i class="fab fa-facebook-f text-lg"></i>
                         </a>
                         <a href="#" class="text-gray-400 hover:text-primary transition-colors">
-                            <i class="fab fa-twitter text-lg"></i>
+                            <i class="fab fa-tiktok text-lg"></i>
                         </a>
                         <a href="#" class="text-gray-400 hover:text-primary transition-colors">
                             <i class="fab fa-instagram text-lg"></i>
@@ -614,21 +553,21 @@
                         <li class="flex items-start">
                             <i class="fas fa-map-marker-alt text-gray-400 w-4 mt-1 mr-3"></i>
                             <span class="text-sm text-gray-600">
-                                Jl. Pendidikan No. 123<br>
-                                Jakarta Pusat, DKI Jakarta 10110
+                                Jl. Ambo Siraje No.1<br>
+                                Kec. Suppa, Kab. Pinrang
                             </span>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-phone text-gray-400 w-4 mr-3"></i>
-                            <span class="text-sm text-gray-600">(021) 1234-5678</span>
+                            <span class="text-sm text-gray-600">0852-4664-1084</span>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-envelope text-gray-400 w-4 mr-3"></i>
-                            <span class="text-sm text-gray-600">info@sman1jakarta.sch.id</span>
+                            <span class="text-sm text-gray-600">spensasuppa@gmail.com</span>
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-globe text-gray-400 w-4 mr-3"></i>
-                            <span class="text-sm text-gray-600">www.sman1jakarta.sch.id</span>
+                            <span class="text-sm text-gray-600">www.smpn1suppa.sch.id</span>
                         </li>
                     </ul>
                 </div>
@@ -639,18 +578,14 @@
                 <div class="flex flex-col md:flex-row justify-between items-center">
                     <div class="flex items-center space-x-6 mb-4 md:mb-0">
                         <p class="text-sm text-gray-500">
-                            © 2025 SMA Negeri 1 Jakarta. All rights reserved.
+                            © 2025 UPT SMP Negeri 1 Suppa. All rights reserved.
                         </p>
-                        <div class="flex items-center space-x-4">
-                            <a href="#" class="text-sm text-gray-500 hover:text-primary transition-colors">Privacy Policy</a>
-                            <span class="text-gray-300">|</span>
-                            <a href="#" class="text-sm text-gray-500 hover:text-primary transition-colors">Terms of Service</a>
-                        </div>
+                        
                     </div>
                     <div class="flex items-center space-x-2 text-sm text-gray-500">
                         <i class="fas fa-code text-primary"></i>
                         <span>Powered by</span>
-                        <span class="font-medium text-primary">EduTech Solutions</span>
+                        <span class="font-medium text-primary">TIM IT SPENSA SUPPA</span>
                     </div>
                 </div>
             </div>
@@ -1026,62 +961,66 @@ updateStatistics();
             container.dataset.lastData = currentDataString;
             
             // Animate new data
-            container.style.opacity = '0.7';
-            setTimeout(() => {
-                container.innerHTML = '';
-                
-                recentData.forEach((item, index) => {
-                const statusClass = getStatusClass(item.keterangan);
-                const statusBadge = getStatusBadge(item.keterangan);
-                const div = document.createElement('div');
-                div.className = `
-                    flex flex-col sm:flex-row sm:items-center sm:justify-between 
-                    p-3 sm:p-4 bg-white border border-gray-100 rounded-lg 
-                    hover:shadow-md transition-all duration-200 animate-fade-in
-                `;
-                div.style.animationDelay = `${index * 50}ms`;
-                
-                div.innerHTML = `
-                    <div class="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
-                        <div class="relative flex-shrink-0">
-                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full ${statusClass} 
-                                flex items-center justify-center text-white font-bold shadow-sm text-sm sm:text-base">
-                                ${getStatusIcon(item.keterangan)}
+            // Animate new data
+                container.style.opacity = '0.7';
+                setTimeout(() => {
+                    container.innerHTML = '';
+                    
+                    recentData.forEach((item, index) => {
+                        const statusClass = getStatusClass(item.keterangan);
+                        const statusBadge = getStatusBadge(item.keterangan);
+                        const div = document.createElement('div');
+                        
+                        // Mengurangi padding dan menambahkan gap untuk elemen yang lebih rapat
+                        div.className = `
+                            flex flex-col sm:flex-row sm:items-center sm:justify-between 
+                            p-2 sm:p-2 bg-white border border-gray-100 rounded-md 
+                            hover:shadow-sm transition-all duration-200 animate-fade-in
+                        `;
+                        div.style.animationDelay = `${index * 50}ms`;
+                        
+                        div.innerHTML = `
+                            <div class="flex items-center space-x-2 w-full sm:w-auto">
+                                <div class="relative flex-shrink-0">
+                                    <div class="w-8 h-8 rounded-full ${statusClass} 
+                                        flex items-center justify-center text-white font-bold shadow-sm text-xs">
+                                        ${getStatusIcon(item.keterangan)}
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center space-x-1 mb-0 flex-wrap">
+                                        <h6 class="font-semibold text-gray-900 text-sm truncate max-w-[200px]">
+                                            ${item.namaLengkap || item.namaSiswa}
+                                        </h6>
+                                        ${statusBadge}
+                                    </div>
+                                    <div class="flex flex-wrap gap-1 text-[10px] text-gray-500">
+                                        <span class="flex items-center truncate">
+                                            <i class="fas fa-graduation-cap mr-0.5"></i>
+                                            ${item.kelas}
+                                        </span>
+                                        <span class="flex items-center truncate">
+                                            <i class="fas fa-book mr-0.5"></i>
+                                            ${item.mataPelajaran}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center space-x-2 mb-1 flex-wrap">
-                                <h4 class="font-semibold text-gray-900 text-sm sm:text-base truncate max-w-[150px] sm:max-w-[200px]">
-                                    ${item.namaLengkap || item.namaSiswa}
-                                </h4>
-                                ${statusBadge}
-                            </div>
-                            <div class="flex flex-wrap gap-2 text-xs sm:text-sm text-gray-500">
-                                <span class="flex items-center truncate">
-                                    <i class="fas fa-graduation-cap mr-1"></i>
-                                    ${item.kelas}
-                                </span>
-                                <span class="flex items-center truncate">
-                                    <i class="fas fa-book mr-1"></i>
-                                    ${item.mataPelajaran}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-left sm:text-right mt-2 sm:mt-0">
-                        <div class="text-xs sm:text-sm font-medium text-gray-900 mb-1">${formatDate(item.tanggal)}</div>
+                            <div class="text-left sm:text-right mt-1 sm:mt-0">
+                                <div class="text-xs sm:text-sm font-medium text-gray-900 mb-1">${formatDate(item.tanggal)}</div>
                         <div class="text-xs sm:text-sm text-gray-500 flex items-center sm:justify-end">
                             <i class="fas fa-clock mr-1"></i>
                             ${item.jam}
                         </div>
-                    </div>
-                    `;
+
+                            </div>
+                        `;
+                            
+                        container.appendChild(div);
+                    });
                     
-                    container.appendChild(div);
-                });
-                
-                container.style.opacity = '1';
-            }, 150);
+                    container.style.opacity = '1';
+                }, 150);
         }
         
         // Helper function untuk format tanggal
