@@ -812,18 +812,14 @@ async function fetchDataFromSheets(showLoading = false) {
         // Ganti URL_APLIKASI_WEB dengan URL yang Anda dapatkan di Langkah 2
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzIjaIJuwoJ_H5-le3aIwKFM-si475Vah3-phBEgEgPedytcHICFKqWfzTNpzX4bHaf/exec'; 
 
+
 // Fungsi untuk mengambil dan memperbarui statistik dari Google Apps Script
 function updateStatistics() {
     fetch(SCRIPT_URL)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.error) {
-                console.error('Error from Apps Script:', data.error);
+                console.error(data.error);
                 return;
             }
 
@@ -835,10 +831,7 @@ function updateStatistics() {
             document.getElementById('totalTerlambat').textContent = data.totalTerlambat;
             document.getElementById('totalBolos').textContent = data.totalBolos;
         })
-        .catch(error => {
-            console.error('Error fetching statistics:', error);
-            // Anda bisa menampilkan pesan error kepada pengguna di sini
-        });
+        .catch(error => console.error('Error fetching statistics:', error));
 }
 
 // Panggil fungsi ini saat halaman dimuat
