@@ -384,7 +384,7 @@
                 </div>
                 <div class="ml-3 min-w-0 flex-1">
                     <p class="text-xs font-medium text-gray-600 truncate">Total Hadir</p>
-                    <p class="text-xl font-bold text-gray-900">847</p>
+                    <p id="totalHadir" class="text-xl font-bold text-gray-900">0</p>
                 </div>
             </div>
             
@@ -394,7 +394,7 @@
                 </div>
                 <div class="ml-3 min-w-0 flex-1">
                     <p class="text-xs font-medium text-gray-600 truncate">Total Alpa</p>
-                    <p class="text-xl font-bold text-gray-900">23</p>
+                    <p id="totalAlpa" class="text-xl font-bold text-gray-900">0</p>
                 </div>
             </div>
             
@@ -404,7 +404,7 @@
                 </div>
                 <div class="ml-3 min-w-0 flex-1">
                     <p class="text-xs font-medium text-gray-600 truncate">Total Sakit</p>
-                    <p class="text-xl font-bold text-gray-900">15</p>
+                    <p id="totalSakit" class="text-xl font-bold text-gray-900">0</p>
                 </div>
             </div>
             
@@ -414,7 +414,7 @@
                 </div>
                 <div class="ml-3 min-w-0 flex-1">
                     <p class="text-xs font-medium text-gray-600 truncate">Total Izin</p>
-                    <p class="text-xl font-bold text-gray-900">8</p>
+                    <p id="totalIzin" class="text-xl font-bold text-gray-900">0</p>
                 </div>
             </div>
             
@@ -424,7 +424,7 @@
                 </div>
                 <div class="ml-3 min-w-0 flex-1">
                     <p class="text-xs font-medium text-gray-600 truncate">Total Terlambat</p>
-                    <p class="text-xl font-bold text-gray-900">12</p>
+                    <p id="totalTerlambat" class="text-xl font-bold text-gray-900">0</p>
                 </div>
             </div>
             
@@ -434,7 +434,7 @@
                 </div>
                 <div class="ml-3 min-w-0 flex-1">
                     <p class="text-xs font-medium text-gray-600 truncate">Total Bolos</p>
-                    <p class="text-xl font-bold text-gray-900">7</p>
+                    <p id="totalBolos" class="text-xl font-bold text-gray-900">0</p>
                 </div>
             </div>
         </div>
@@ -858,19 +858,58 @@ async function fetchDataFromSheets(showLoading = false) {
 }
         
         // Fungsi untuk memperbarui statistik
-        function updateStatistics() {
-            const hadir = allData.filter(item => item.keterangan.toLowerCase().includes('hadir')).length;
-            const alpa = allData.filter(item => item.keterangan.toLowerCase().includes('alpa')).length;
-            const sakit = allData.filter(item => item.keterangan.toLowerCase().includes('sakit')).length;
-            const izin = allData.filter(item => item.keterangan.toLowerCase().includes('izin')).length;
-            const terlambat = allData.filter(item => item.keterangan.toLowerCase().includes('terlambat')).length;
+        // Asli
+        // function updateStatistics() {
+        //     const hadir = allData.filter(item => item.keterangan.toLowerCase().includes('hadir')).length;
+        //     const alpa = allData.filter(item => item.keterangan.toLowerCase().includes('alpa')).length;
+        //     const sakit = allData.filter(item => item.keterangan.toLowerCase().includes('sakit')).length;
+        //     const izin = allData.filter(item => item.keterangan.toLowerCase().includes('izin')).length;
+        //     const terlambat = allData.filter(item => item.keterangan.toLowerCase().includes('terlambat')).length;
             
-            document.getElementById('totalHadir').textContent = hadir;
-            document.getElementById('totalAlpa').textContent = alpa;
-            document.getElementById('totalSakit').textContent = sakit;
-            document.getElementById('totalIzin').textContent = izin;
-            document.getElementById('totalTerlambat').textContent = terlambat;
+        //     document.getElementById('totalHadir').textContent = hadir;
+        //     document.getElementById('totalAlpa').textContent = alpa;
+        //     document.getElementById('totalSakit').textContent = sakit;
+        //     document.getElementById('totalIzin').textContent = izin;
+        //     document.getElementById('totalTerlambat').textContent = terlambat;
+        // }
+
+        function updateStatistics() {
+          const norm = s => (s || '').toString().toLowerCase();
+          const ket = item => norm(item.keterangan || item.KETERANGAN || '');
+        
+          const hadir      = allData.filter(item => ket(item).includes('hadir')).length;
+          const alpa       = allData.filter(item => ket(item).includes('alpa')).length;
+          const sakit      = allData.filter(item => ket(item).includes('sakit')).length;
+          const izin       = allData.filter(item => ket(item).includes('izin')).length;
+          const terlambat  = allData.filter(item => ket(item).includes('terlambat')).length;
+          const bolos      = allData.filter(item => ket(item).includes('bolos')).length;
+        
+          // Update UI
+          const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+          setText('totalHadir', hadir);
+          setText('totalAlpa', alpa);
+          setText('totalSakit', sakit);
+          setText('totalIzin', izin);
+          setText('totalTerlambat', terlambat);
+          setText('totalBolos', bolos);
+        
+          // Ganti dengan URL deployment Web App
+          const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzT4SmyBYWc8gRLCtf99CLzl5xUQ1sM8lzFJl_sadh8K5oXCRWIB53BBaW5mVJydv4/exec';
+        
+          fetch(WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            // Jika kena CORS, sementara bisa pakai mode: 'no-cors', tapi tidak bisa baca response.
+            // mode: 'no-cors',
+            body: JSON.stringify({ hadir, alpa, izin, sakit, terlambat, bolos })
+          })
+          .then(r => r.json())
+          .then(res => console.log('Sheet updated:', res))
+          .catch(err => console.error('Update failed:', err));
         }
+
+
+        
         
         // Fungsi untuk mengisi filter
         // function populateFilters() {
