@@ -343,38 +343,12 @@
                 </div>
             </div>
 
-            <div class="flex items-center space-x-2 sm:space-x-4">                 
-                <nav class="flex items-center space-x-8">
-                    <a href="index-edit.html" onclick="showDashboard()" 
-                    class="text-primary font-medium border-b-2 border-primary pb-1">
-                        Dashboard
-                    </a>
-                    <a href="#" onclick="showRekap()" 
-                    class="text-gray-700 hover:text-primary transition-colors font-medium border-b-2 border-transparent hover:border-primary pb-1">
-                        Rekap Presensi
-                    </a>
-                    <a href="#" onclick="showCetakKartu()" 
-                    class="text-gray-700 hover:text-primary transition-colors font-medium border-b-2 border-transparent hover:border-primary pb-1">
-                        Cetak Kartu
-                    </a>
-                </nav>
-                <div class="flex items-center space-x-2 sm:space-x-4">
-                <div id="connectionStatus" class="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
-                    <div id="statusIndicator" class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span id="statusText">Live</span>
-                    <span id="lastUpdate" class="text-xs text-gray-400"></span>
-                    <span id="nextRefresh" class="text-xs text-blue-400"></span>
-                </div>                   
-                 <button id="refreshButton" onclick="manualRefresh()" class="btn-touch bg-white text-blue-600 hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-blue-200">
-                        <i id="refreshIcon" class="fas fa-sync-alt"></i>
-                        <span class="hidden sm:inline">Refresh</span>
-                        <span class="sm:hidden">Ref</span>
-                </button>
+           
                 
 
 
             
-<!--             <div class="flex items-center space-x-2 sm:space-x-4">
+            <div class="flex items-center space-x-2 sm:space-x-4">
                 <div id="connectionStatus" class="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
                     <div id="statusIndicator" class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     <span id="statusText">Live</span>
@@ -385,12 +359,12 @@
                     <i class="fas fa-id-card text-sm"></i>
                     <span class="hidden sm:inline">Cek Kartu Presensi</span>
                     <span class="sm:hidden">Kartu</span>
-                </button> -->
-<!--                 <button id="refreshButton" onclick="manualRefresh()" class="btn-touch bg-white text-blue-600 hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-blue-200">
+                </button>
+                <button id="refreshButton" onclick="manualRefresh()" class="btn-touch bg-white text-blue-600 hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-blue-200">
                         <i id="refreshIcon" class="fas fa-sync-alt"></i>
                         <span class="hidden sm:inline">Refresh</span>
                         <span class="sm:hidden">Ref</span>
-                </button> -->
+                </button>
                  
             </div>
         </div>
