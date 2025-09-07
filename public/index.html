@@ -331,18 +331,37 @@
                     <img src="../THIRD LOWER-logo.svg" alt="Logo SMP" class="w-7 h-7 sm:w-9 sm:h-9 inline-block">
                 </div>
                 <div class="hidden sm:block">
-                    <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-green-600 to-indigo-600 bg-clip-text text-transparent">
+                    <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-green-600 to-indigo-600 bg-clip-text ">
                         Sistem Presensi
                     </h1>
                     <p class="text-xs text-gray-500">Real-time Monitoring</p>
                 </div>
                 <div class="block sm:hidden">
-                    <h1 class="text-sm font-bold bg-gradient-to-r from-from-green-600 to-indigo-600 bg-clip-text text-transparent">
+                    <h1 class="text-sm font-bold bg-gradient-to-r from-from-green-600 to-indigo-600 bg-clip-text ">
                         Sistem Presensi
                     </h1>
                 </div>
             </div>
-            <div class="flex items-center space-x-2 sm:space-x-4">
+
+            <div class="flex items-center space-x-2 sm:space-x-4">                 
+                <nav class="flex items-center space-x-8">
+                    <a href="index-edit.html" onclick="showDashboard()" 
+                    class="text-primary font-medium border-b-2 border-primary pb-1">
+                        Dashboard
+                    </a>
+                    <a href="#" onclick="showRekap()" 
+                    class="text-gray-700 hover:text-primary transition-colors font-medium border-b-2 border-transparent hover:border-primary pb-1">
+                        Rekap Presensi
+                    </a>
+                    <a href="#" onclick="showCetakKartu()" 
+                    class="text-gray-700 hover:text-primary transition-colors font-medium border-b-2 border-transparent hover:border-primary pb-1">
+                        Cetak Kartu
+                    </a>
+                </nav>
+
+
+            
+<!--             <div class="flex items-center space-x-2 sm:space-x-4">
                 <div id="connectionStatus" class="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
                     <div id="statusIndicator" class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     <span id="statusText">Live</span>
@@ -353,7 +372,7 @@
                     <i class="fas fa-id-card text-sm"></i>
                     <span class="hidden sm:inline">Cek Kartu Presensi</span>
                     <span class="sm:hidden">Kartu</span>
-                </button>
+                </button> -->
 <!--                 <button id="refreshButton" onclick="manualRefresh()" class="btn-touch bg-white text-blue-600 hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-blue-200">
                         <i id="refreshIcon" class="fas fa-sync-alt"></i>
                         <span class="hidden sm:inline">Refresh</span>
@@ -383,14 +402,14 @@
                     <i class="fas fa-check text-green-500 text-lg"></i>
                 </div>
                 <div class="ml-3 min-w-0 flex-1">
-                    <p class="text-xs font-medium text-gray-600 truncate">Total Hadir</p>
-                    <p id="totalHadir" class="text-xl font-bold text-gray-900">0</p>
+                    <p class="text-xs font-medium text-gray-600 truncate">Total Siswa</p>
+                    <p id="totalHadir" class="text-xl font-bold text-gray-900">383</p>
                 </div>
             </div>
             
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-24 flex items-center">
                 <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-times text-red text-lg"></i>
+                    <i class="fas fa-times text-red-500 text-lg"></i>
                 </div>
                 <div class="ml-3 min-w-0 flex-1">
                     <p class="text-xs font-medium text-gray-600 truncate">Total Alpa</p>
