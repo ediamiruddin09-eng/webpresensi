@@ -873,40 +873,40 @@ async function fetchDataFromSheets(showLoading = false) {
         //     document.getElementById('totalTerlambat').textContent = terlambat;
         // }
 
-        function updateStatistics() {
-          const norm = s => (s || '').toString().toLowerCase();
-          const ket = item => norm(item.keterangan || item.KETERANGAN || '');
-        
-          const hadir      = allData.filter(item => ket(item).includes('hadir')).length;
-          const alpa       = allData.filter(item => ket(item).includes('alpa')).length;
-          const sakit      = allData.filter(item => ket(item).includes('sakit')).length;
-          const izin       = allData.filter(item => ket(item).includes('izin')).length;
-          const terlambat  = allData.filter(item => ket(item).includes('terlambat')).length;
-          const bolos      = allData.filter(item => ket(item).includes('bolos')).length;
-        
-          // Update UI
-          const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-          setText('totalHadir', hadir);
-          setText('totalAlpa', alpa);
-          setText('totalSakit', sakit);
-          setText('totalIzin', izin);
-          setText('totalTerlambat', terlambat);
-          setText('totalBolos', bolos);
-        
-          // Ganti dengan URL deployment Web App
-          const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzT4SmyBYWc8gRLCtf99CLzl5xUQ1sM8lzFJl_sadh8K5oXCRWIB53BBaW5mVJydv4/exec';
-        
-          fetch(WEB_APP_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            // Jika kena CORS, sementara bisa pakai mode: 'no-cors', tapi tidak bisa baca response.
-            // mode: 'no-cors',
-            body: JSON.stringify({ hadir, alpa, izin, sakit, terlambat, bolos })
-          })
-          .then(r => r.json())
-          .then(res => console.log('Sheet updated:', res))
-          .catch(err => console.error('Update failed:', err));
-        }
+        // Ganti URL_APLIKASI_WEB dengan URL yang Anda dapatkan di Langkah 2
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5-o9lqDzFeJZDLE63koLOBBd-ndoFqtvlMi7UIL0ZCB0F_MwMmJL3QAK7fB9ukGf-/exec'; 
+
+// Fungsi untuk mengambil dan memperbarui statistik dari Google Apps Script
+function updateStatistics() {
+    fetch(SCRIPT_URL)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                console.error('Error from Apps Script:', data.error);
+                return;
+            }
+
+            // Memperbarui elemen HTML dengan nilai dari data yang diterima
+            document.getElementById('totalHadir').textContent = data.totalHadir;
+            document.getElementById('totalAlpa').textContent = data.totalAlpa;
+            document.getElementById('totalSakit').textContent = data.totalSakit;
+            document.getElementById('totalIzin').textContent = data.totalIzin;
+            document.getElementById('totalTerlambat').textContent = data.totalTerlambat;
+            document.getElementById('totalBolos').textContent = data.totalBolos;
+        })
+        .catch(error => {
+            console.error('Error fetching statistics:', error);
+            // Anda bisa menampilkan pesan error kepada pengguna di sini
+        });
+}
+
+// Panggil fungsi ini saat halaman dimuat
+updateStatistics();
 
 
         
