@@ -1,0 +1,2143 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Presensi Siswa</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#1e3a8a',
+                        'secondary': '#64748b',
+                        'success': '#16a34a',
+                        'warning': '#eab308',
+                        'danger': '#dc2626',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+
+         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; line-height: 1.5;}
+
+        
+        /* Loading Screen Styles */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }               
+
+        #loadingScreen.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .loading-content {
+            text-align: center;
+            color: #374151;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .loading-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10B981, #047857);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .loading-logo i {
+            font-size: 40px;
+            color: white;
+        }
+        
+        .loading-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .loading-subtitle {
+            font-size: 16px;
+            opacity: 0.6;
+            margin-bottom: 40px;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #10B981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .loading-dot {
+            width: 12px;
+            height: 12px;
+            background: #10B981;
+            border-radius: 50%;
+            margin: 0 5px;
+            animation: bounce 1.4s ease-in-out infinite both;
+        }
+        
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dot:nth-child(3) { animation-delay: 0; }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            } 40% {
+                transform: scale(1);
+            }
+        }
+
+        /* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #f8fafc;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        } */
+        
+        /* .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 16px;
+        } */
+        
+        /* @media (min-width: 768px) {
+            .container {
+                max-width: 1200px;
+                padding: 0 24px;
+            }
+        } */
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .simple-header {
+            background: #3b82f6;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+        
+        .simple-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        @media (min-width: 768px) {
+            .simple-header {
+                padding: 32px 0;
+            }
+            .simple-header h1 {
+                font-size: 28px;
+            }
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #059669;
+        }
+        
+        .btn-export {
+            background: #6b7280;
+            color: white;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        
+        .btn-export:hover {
+            background: #4b5563;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        /* .tab-container {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+            color: #64748b;
+        }
+        
+        .tab-btn.active {
+            background: #00a085;
+            color: white;
+        } */
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-hadir { background: #dcfce7; color: #166534; }
+        .status-alpa { background: #fee2e2; color: #991b1b; }
+        .status-izin { background: #fef3c7; color: #92400e; }
+        .status-sakit { background: #ede9fe; color: #6b21a8; }
+        .status-terlambat { background: #fed7aa; color: #c2410c; }
+        .status-bolos { background: #f3f4f6; color: #374151; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        @media (min-width: 640px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .stats-number {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stats-label {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .stats-card.green .stats-number { color: #059669; }
+        .stats-card.red .stats-number { color: #dc2626; }
+        .stats-card.yellow .stats-number { color: #d97706; }
+        .stats-card.purple .stats-number { color: #7c3aed; }
+        .stats-card.orange .stats-number { color: #ea580c; }
+        .stats-card.gray .stats-number { color: #4b5563; }
+        
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .simple-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        .simple-table th {
+            background: #f8fafc;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+        
+        .simple-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .simple-table tbody tr:hover {
+            background: #f8fafc;
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .toast {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            left: 16px;
+            z-index: 1000;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-100px);
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        @media (min-width: 640px) {
+            .toast {
+                left: auto;
+                min-width: 300px;
+                max-width: 400px;
+            }
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+        }
+        
+        .toast-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .toast-error {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .toast-info {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .toast-close {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        
+        .filter-grid {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        @media (min-width: 640px) {
+            .filter-grid {
+                grid-template-columns: 1fr 1fr auto;
+                align-items: end;
+            }
+        }
+        
+        .monthly-filter-grid {
+            display: grid;
+            gap: 16px;
+        }
+        
+        @media (min-width: 640px) {
+            .monthly-filter-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .monthly-filter-grid {
+                grid-template-columns: repeat(4, 1fr);
+                align-items: end;
+            }
+        }
+        
+        .export-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+        
+        .no-data i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #d1d5db;
+        }
+        
+        /* .hidden {
+            display: none !important;
+        } */
+        
+        .space-y-4 > * + * {
+            margin-top: 16px;
+        }
+        
+        .space-y-6 > * + * {
+            margin-top: 24px;
+        }
+
+
+
+
+        .status-online {
+            background-color: #10b981;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        .status-offline {
+            background-color: #ef4444;
+            animation: none;
+        }
+        
+        .status-error {
+            background-color: #f59e0b;
+            animation: blink 1s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .refresh-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+
+        /* Glass morphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        /* Hide main content initially */
+        #mainContent {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        #mainContent.show {
+            opacity: 1;
+        }
+        
+       
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen">
+    
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <i class="fas fa-qrcode"></i>
+            </div>
+            <div class="loading-title">Sistem Monitoring Presensi Siswa</div>
+            <div class="loading-subtitle">Mempersiapkan aplikasi untuk Anda...</div>
+            <div class="loading-spinner"></div>
+            <div class="loading-dots">
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent">
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+    
+    <!-- Header -->
+    
+    
+    <header class="glass sticky top-0 z-40 border-b border-white/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 sm:h-20">
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <div class="w-9 h-9 sm:w-11 sm:h-11  rounded-xl flex items-center justify-center">
+                    <!-- <i class="fas fa-user-check text-white text-sm sm:text-lg"></i> -->
+                    <img src="/THIRD LOWER-logo.svg" alt="Logo SMP" class="w-7 h-7 sm:w-9 sm:h-9 inline-block">
+                </div>
+                <div class="hidden sm:block">
+                    <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-green-600 to-indigo-600 bg-clip-text ">
+                        Sistem Presensi
+                    </h1>
+                    <p class="text-xs text-gray-500">Real-time Monitoring</p>
+                </div>
+                <div class="block sm:hidden">
+                    <h1 class="text-sm font-bold bg-gradient-to-r from-from-green-600 to-indigo-600 bg-clip-text ">
+                        Sistem Presensi
+                    </h1>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2 sm:space-x-4">                 
+                <nav class="flex items-center space-x-8">
+                    <a href="index-edit.html" onclick="showDashboard()" 
+                    class="text-gray-700 hover:text-primary transition-colors font-medium border-b-2 border-transparent hover:border-primary pb-1">
+                        Dashboard
+                    </a>
+                    <a href="#" onclick="showRekap()" 
+                    class="text-primary font-medium border-b-2 border-primary pb-1">
+                        Rekap Presensi
+                    </a>
+                    <a href="#" onclick="showCetakKartu()" 
+                    class="text-gray-700 hover:text-primary transition-colors font-medium border-b-2 border-transparent hover:border-primary pb-1">
+                        Cetak Kartu
+                    </a>
+                </nav>
+
+                <!-- <button id="refreshButton" onclick="manualRefresh()" class="btn-touch bg-white text-blue-600 hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-blue-200">
+                        <i id="refreshIcon" class="fas fa-sync-alt"></i>
+                        <span class="hidden sm:inline">Refresh</span>
+                        <span class="sm:hidden">Ref</span>
+                </button> -->
+
+
+
+                <!-- <div id="connectionStatus" class="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
+                    <div id="statusIndicator" class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span id="statusText">Live</span>
+                    <span id="lastUpdate" class="text-xs text-gray-400"></span>
+                    <span id="nextRefresh" class="text-xs text-blue-400"></span>
+                </div>                -->
+                                 
+            </div>
+        </div>
+    </div>
+</header> 
+   
+
+<!-- <div class="container mx-auto px-6 py-8">  -->
+<div class="container space-y-6 mx-auto px-6 py-8" style="padding-top: 20px; padding-bottom: 40px;">
+    
+    <!-- Navigation Tabs -->
+     <!-- <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-24 flex items-center"></div> -->
+    <div class="bg-white border-b rounded-lg shadow-sm border border-gray-200 p-4 h-24 flex items-center">
+        <div class="px-6">
+            <nav class="flex space-x-8">
+                <button onclick="switchTab('daily')" id="dailyTab" class="py-4 px-1 border-b-2 border-primary text-primary font-medium text-sm">
+                    Rekap Harian
+                </button>
+                <button onclick="switchTab('monthly')" id="monthlyTab" class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm">
+                    Rekap Bulanan
+                </button>                
+            </nav>
+        </div>
+    </div>
+       
+
+    <!-- Main Content Grid -->
+<div class="grid gap-8">       
+        <!-- <div class="bg-white p-6 animate-fade-in rounded-lg shadow-sm border border-gray-200 w-full max-w-full"> -->
+        <!-- Daily Filter Form -->
+        <div id="dailyFilter" class="card p-5">
+  <div class="section-title mb-4">
+    <i class="fas fa-filter"></i>
+    Filter Data Harian
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+    <!-- Tanggal -->
+    <div>
+      <label for="tanggalFilter" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+      <input type="date" id="tanggalFilter"
+             class="w-full border rounded-lg px-3 h-10 focus:outline-none focus:ring focus:ring-blue-300"
+             min="2025-08-01" max="2025-12-31">
+    </div>
+
+    <!-- Kelas -->
+    <div>
+      <label for="kelasFilter" class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+      <select id="kelasFilter"
+              class="w-full border rounded-lg px-3 h-10 focus:outline-none focus:ring focus:ring-blue-300">
+        <option value="">Pilih Kelas</option>
+      </select>
+    </div>
+
+    <!-- Tombol -->
+    <div>
+      <button onclick="loadData()"
+              class="w-full h-10 flex items-center justify-center gap-2 btn btn-primary text-white rounded-lg hover:bg-blue-700 transition">
+        <i class="fas fa-search"></i>
+        Tampilkan
+      </button>
+    </div>
+  </div>
+</div>
+
+
+        <!-- Monthly Filter Form -->
+        <div id="monthlyFilter" class="card hidden p-5">
+            <div class="section-title mb-4">
+                <i class="fas fa-chart-bar"></i>
+                Filter Data Bulanan
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <!-- Bulan -->
+                <div>
+                <label for="bulanFilter" class="block text-sm font-medium text-gray-700 mb-1">Bulan</label>
+                <select id="bulanFilter"
+                        class="w-full border rounded-lg px-3 h-10 focus:outline-none focus:ring focus:ring-blue-300">
+                    <option value="01">Januari</option>
+                    <option value="02">Februari</option>
+                    <option value="03">Maret</option>
+                    <option value="04">April</option>
+                    <option value="05">Mei</option>
+                    <option value="06">Juni</option>
+                    <option value="07">Juli</option>
+                    <option value="08">Agustus</option>
+                    <option value="09">September</option>
+                    <option value="10">Oktober</option>
+                    <option value="11">November</option>
+                    <option value="12">Desember</option>
+                </select>
+                </div>
+
+                <!-- Tahun -->
+                <div>
+                <label for="tahunFilter" class="block text-sm font-medium text-gray-700 mb-1">Tahun</label>
+                <select id="tahunFilter"
+                        class="w-full border rounded-lg px-3 h-10 focus:outline-none focus:ring focus:ring-blue-300">
+                    <option value="2024">2024</option>
+                    <option value="2025" selected>2025</option>
+                    <option value="2026">2026</option>
+                </select>
+                </div>
+
+                <!-- Kelas -->
+                <div>
+                <label for="kelasFilterMonthly" class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                <select id="kelasFilterMonthly"
+                        class="w-full border rounded-lg px-3 h-10 focus:outline-none focus:ring focus:ring-blue-300">
+                    <option value="">Pilih Kelas</option>
+                </select>
+                </div>
+
+                <!-- Tombol -->
+                <div>
+                <button onclick="loadMonthlyData()"
+                        class="w-full h-10 flex items-center justify-center gap-2 btn btn-secondary text-white rounded-lg hover:bg-gray-700 transition">
+                    <i class="fas fa-chart-line"></i>
+                    Tampilkan
+                </button>
+                </div>
+            </div>
+            </div>
+
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden card" style="padding: 40px; text-align: center;">
+            <div class="loading-spinner"></div>
+            <div style="margin-top: 16px; color: #6b7280;">Memuat data...</div>
+        </div>
+
+        <!-- Daily Results -->
+        <div id="resultsContainer" class="hidden space-y-6">
+            <!-- Summary Cards -->
+            <div class="stats-grid">
+                <div class="stats-card green">
+                    <div class="stats-number" id="countHadir">0</div>
+                    <div class="stats-label">Hadir</div>
+                </div>
+                
+                <div class="stats-card red">
+                    <div class="stats-number" id="countAlpa">0</div>
+                    <div class="stats-label">Alpa</div>
+                </div>
+                
+                <div class="stats-card yellow">
+                    <div class="stats-number" id="countIzin">0</div>
+                    <div class="stats-label">Izin</div>
+                </div>
+                
+                <div class="stats-card purple">
+                    <div class="stats-number" id="countSakit">0</div>
+                    <div class="stats-label">Sakit</div>
+                </div>
+                
+                <div class="stats-card orange">
+                    <div class="stats-number" id="countTerlambat">0</div>
+                    <div class="stats-label">Terlambat</div>
+                </div>
+                
+                <div class="stats-card gray">
+                    <div class="stats-number" id="countBolos">0</div>
+                    <div class="stats-label">Bolos</div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="card">
+                <div style="padding: 16px; border-bottom: 1px solid #e5e7eb;">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="section-title" style="margin-bottom: 0;">
+                            <i class="fas fa-table"></i>
+                            <span id="tableTitle">Data Kehadiran</span>
+                        </div>
+                        <div class="export-buttons">
+                            <button onclick="exportDailyToExcel()" class="btn btn-export">
+                                <i class="fas fa-file-excel"></i>
+                                Excel
+                            </button>
+                            <button onclick="printDailyToPDF()" class="btn btn-export">
+                                <i class="fas fa-file-pdf"></i>
+                                PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="simple-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Rombel</th>
+                                <th>Kelas</th>
+                                <th>NISN</th>
+                                <th>Nama Siswa</th>
+                                <!-- <th>Semester</th> -->
+                                <th style="text-align: center;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Results -->
+        <div id="monthlyResultsContainer" class="hidden space-y-6">
+            <!-- Monthly Summary Cards -->
+            <div class="stats-grid">
+                <div class="stats-card green">
+                    <div class="stats-number" id="monthlyCountHadir">0</div>
+                    <div class="stats-label">Total Hadir</div>
+                </div>
+                
+                <div class="stats-card red">
+                    <div class="stats-number" id="monthlyCountAlpa">0</div>
+                    <div class="stats-label">Total Alpa</div>
+                </div>
+                
+                <div class="stats-card yellow">
+                    <div class="stats-number" id="monthlyCountIzin">0</div>
+                    <div class="stats-label">Total Izin</div>
+                </div>
+                
+                <div class="stats-card purple">
+                    <div class="stats-number" id="monthlyCountSakit">0</div>
+                    <div class="stats-label">Total Sakit</div>
+                </div>
+                
+                <div class="stats-card orange">
+                    <div class="stats-number" id="monthlyCountTerlambat">0</div>
+                    <div class="stats-label">Total Terlambat</div>
+                </div>
+                
+                <div class="stats-card gray">
+                    <div class="stats-number" id="monthlyCountBolos">0</div>
+                    <div class="stats-label">Total Bolos</div>
+                </div>
+            </div>
+
+            <!-- Monthly Data Table -->
+            <div class="card">
+                <div style="padding: 16px; border-bottom: 1px solid #e5e7eb;">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="section-title" style="margin-bottom: 0;">
+                            <i class="fas fa-chart-bar"></i>
+                            <span id="monthlyTableTitle">Rekap Kehadiran Bulanan</span>
+                        </div>
+                        <div class="export-buttons">
+                            <button onclick="exportMonthlyToExcel()" class="btn btn-export">
+                                <i class="fas fa-file-excel"></i>
+                                Excel
+                            </button>
+                            <button onclick="printMonthlyToPDF()" class="btn btn-export">
+                                <i class="fas fa-file-pdf"></i>
+                                PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="simple-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>NISN</th>
+                                <th>Nama Siswa</th>
+                                <th style="text-align: center;">Hadir</th>
+                                <th style="text-align: center;">Alpa</th>
+                                <th style="text-align: center;">Izin</th>
+                                <th style="text-align: center;">Sakit</th>
+                                <th style="text-align: center;">Terlambat</th>
+                                <th style="text-align: center;">Bolos</th>
+                                <th style="text-align: center;">Total</th>
+                                <th style="text-align: center;">%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monthlyDataTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Data State -->
+        <div id="noDataState" class="hidden card no-data">
+            <i class="fas fa-clipboard-list"></i>
+            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #374151;">Belum Ada Data</div>
+            <div>Pilih tanggal dan kelas untuk melihat data kehadiran</div>
+        </div>
+    </div>
+    
+<!-- </div> -->
+</div>
+    
+
+            
+    
+    <!-- Footer dengan gradient -->
+    <!-- <footer class="bg-gradient-to-r from-lime-600 via-emerald-700 to-green-900 text-white py-12 mt-16" -->
+    <footer class="bg-white border-t border-gray-200 mt-12 py-8">                            
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">     
+                <!-- School Info -->
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-graduation-cap text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">UPT SMP NEGERI 1 SUPPA</h3>
+                            <p class="text-sm text-gray-500">Sistem Presensi Digital</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Sistem presensi digital yang memudahkan monitoring kehadiran siswa secara real-time dengan teknologi modern dan user-friendly interface.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+                            <i class="fab fa-facebook-f text-lg"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+                            <i class="fab fa-tiktok text-lg"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+                            <i class="fab fa-instagram text-lg"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+                            <i class="fab fa-youtube text-lg"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Fitur Utama</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-400 text-sm"></i>
+                            <span class="text-sm text-gray-600">Monitoring Real-time</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-400 text-sm"></i>
+                            <span class="text-sm text-gray-600">Terintegrasi WhatsAapp</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-400 text-sm"></i>
+                            <span class="text-sm text-gray-600">Rekap Presensi</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-check text-green-400 text-sm"></i>
+                            <span class="text-sm text-gray-600">Statistik Lengkap</span>
+                        </li>
+                        
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Kontak</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-gray-400 w-4 mt-1 mr-3"></i>
+                            <span class="text-sm text-gray-600">
+                                Jl. Ambo Siraje No.1<br>
+                                Kec. Suppa, Kab. Pinrang
+                            </span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone text-gray-400 w-4 mr-3"></i>
+                            <span class="text-sm text-gray-600">0852-4664-1084</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope text-gray-400 w-4 mr-3"></i>
+                            <span class="text-sm text-gray-600">spensasuppa@gmail.com</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-globe text-gray-400 w-4 mr-3"></i>
+                            <span class="text-sm text-gray-600">www.smpn1suppa.sch.id</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Footer -->
+            <div class="border-t border-gray-200 mt-8 pt-6">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="flex items-center space-x-6 mb-4 md:mb-0">
+                        <p class="text-sm text-gray-500">
+                            © 2025 UPT SMP Negeri 1 Suppa. All rights reserved.
+                        </p>
+                        
+                    </div>
+                    <div class="flex items-center space-x-2 text-sm text-gray-500">
+                        <i class="fas fa-code text-primary"></i>
+                        <span>Powered by</span>
+                        <span class="font-medium text-primary">TIM IT SPENSA SUPPA</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+    
+
+    <script>
+        // Loading screen functionality
+        window.addEventListener('load', function() {
+            // Simulate minimum loading time for better UX
+            setTimeout(function() {
+                const loadingScreen = document.getElementById('loadingScreen');
+                const mainContent = document.getElementById('mainContent');
+                
+                // Fade out loading screen
+                loadingScreen.classList.add('fade-out');
+                
+                // Show main content after loading screen fades out
+                setTimeout(function() {
+                    mainContent.classList.add('show');
+                    document.body.style.overflow = 'auto'; // Re-enable scrolling
+                }, 500);
+                
+            }, 1500); // Minimum 1.5 second loading time
+        });
+        
+        // Initially disable scrolling
+        document.body.style.overflow = 'hidden';
+
+        // Google Sheets Configuration
+        const SHEET_ID = '1J245q9__3jJ9rZvrzK7rp5FlN06UedwmchSu7uYvhko';
+        const API_KEY = 'AIzaSyAJZCA_UFQPi_bJLPyhIX82zevOWq9BTZI';
+        const SHEET_NAME = 'Sheet1'; // Ganti dengan nama sheet yang sesuai
+        
+        let sheetsData = [];
+        let dateColumns = [];
+
+        // Toast notification function
+        function showToast(message, type = 'info', duration = 4000) {
+            const toastContainer = document.getElementById('toastContainer');
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            toast.innerHTML = `
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 mr-3">
+                        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'} text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium">${message}</p>
+                    </div>
+                    <button class="toast-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Show toast with animation
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            // Auto remove toast
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.remove();
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        // Function to load data from Google Sheets
+        async function loadSheetsData() {
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data dari Google Sheets');
+                }
+                
+                const data = await response.json();
+                const rows = data.values;
+                
+                if (!rows || rows.length === 0) {
+                    throw new Error('Tidak ada data ditemukan');
+                }
+                
+                // Parse header row to get date columns
+                const headers = rows[0];
+                dateColumns = [];
+                
+                // Find date columns (starting from column G = index 6)
+                for (let i = 6; i < headers.length; i++) {
+                    const header = headers[i];
+                    // Check if header is a date format
+                    if (header && (header.includes('/') || header.includes('-'))) {
+                        // Convert to standard date format
+                        let dateStr = header;
+                        if (header.includes('/')) {
+                            // Convert DD/MM/YYYY to YYYY-MM-DD
+                            const parts = header.split('/');
+                            if (parts.length === 3) {
+                                dateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                            }
+                        }
+                        dateColumns.push({
+                            index: i,
+                            original: header,
+                            formatted: dateStr
+                        });
+                    }
+                }
+                
+                // Parse data rows
+                sheetsData = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (row.length >= 6) { // Ensure minimum required columns
+                        const studentData = {
+                            no: row[0] || '',
+                            rombel: row[1] || '',
+                            kelas: row[2] || '',
+                            nisn: row[3] || '',
+                            nama: row[4] || '',
+                            semester: getSemester(), // Calculate based on current date
+                            dates: {}
+                        };
+                        
+                        // Add attendance data for each date
+                        dateColumns.forEach(dateCol => {
+                            const attendance = row[dateCol.index] || '';
+                            studentData.dates[dateCol.formatted] = attendance;
+                        });
+                        
+                        sheetsData.push(studentData);
+                    }
+                }
+                
+                // Populate class dropdown with unique classes
+                populateClassDropdown();
+                
+                // Show success toast
+                showToast(`Berhasil memuat data ${sheetsData.length} siswa dari Google Sheets`, 'success');
+                
+                console.log('Data berhasil dimuat dari Google Sheets:', sheetsData.length, 'siswa');
+                
+            } catch (error) {
+                console.error('Error loading Google Sheets data:', error);
+                showToast('Gagal memuat data dari Google Sheets. Pastikan API Key sudah benar dan sheet dapat diakses publik.', 'error', 6000);
+            }
+        }
+
+        // Function to determine semester based on current date
+        function getSemester() {
+            const now = new Date();
+            const month = now.getMonth() + 1; // getMonth() returns 0-11
+            
+            // Semester Ganjil: Juli-Desember (7-12)
+            // Semester Genap: Januari-Juni (1-6)
+            return (month >= 7) ? 'Ganjil' : 'Genap';
+        }
+
+        // Function to populate class dropdown with unique classes from data
+        function populateClassDropdown() {
+            const kelasSelect = document.getElementById('kelasFilter');
+            const kelasSelectMonthly = document.getElementById('kelasFilterMonthly');
+            const uniqueClasses = [...new Set(sheetsData.map(student => student.kelas))].filter(kelas => kelas);
+            
+            // Clear existing options except the first one
+            kelasSelect.innerHTML = '<option value="">Pilih Kelas</option>';
+            kelasSelectMonthly.innerHTML = '<option value="">Pilih Kelas</option>';
+            
+            uniqueClasses.sort().forEach(kelas => {
+                // Daily dropdown
+                const option1 = document.createElement('option');
+                option1.value = kelas;
+                option1.textContent = kelas;
+                kelasSelect.appendChild(option1);
+                
+                // Monthly dropdown
+                const option2 = document.createElement('option');
+                option2.value = kelas;
+                option2.textContent = kelas;
+                kelasSelectMonthly.appendChild(option2);
+            });
+        }
+
+        // Function to switch between tabs
+        function switchTab(tabType) {
+            const dailyTab = document.getElementById('dailyTab');
+            const monthlyTab = document.getElementById('monthlyTab');
+            const dailyFilter = document.getElementById('dailyFilter');
+            const monthlyFilter = document.getElementById('monthlyFilter');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const monthlyResultsContainer = document.getElementById('monthlyResultsContainer');
+            const noDataState = document.getElementById('noDataState');
+            
+            // Hide all results
+            resultsContainer.classList.add('hidden');
+            monthlyResultsContainer.classList.add('hidden');
+            noDataState.classList.remove('hidden');
+            
+            if (tabType === 'daily') {
+                // Style active tab (daily)
+                dailyTab.classList.add('border-primary', 'text-primary');
+                dailyTab.classList.remove('border-transparent', 'text-gray-500');
+                
+                monthlyTab.classList.remove('border-primary', 'text-primary');
+                monthlyTab.classList.add('border-transparent', 'text-gray-500');
+                
+                // Show daily filter, hide monthly filter
+                dailyFilter.classList.remove('hidden');
+                monthlyFilter.classList.add('hidden');
+            } else {
+                // Style active tab (monthly)
+                dailyTab.classList.remove('border-primary', 'text-primary');
+                dailyTab.classList.add('border-transparent', 'text-gray-500');
+                
+                monthlyTab.classList.add('border-primary', 'text-primary');
+                monthlyTab.classList.remove('border-transparent', 'text-gray-500');
+                
+                // Show monthly filter, hide daily filter
+                monthlyFilter.classList.remove('hidden');
+                dailyFilter.classList.add('hidden');
+            }
+        }
+
+
+        // Function to load monthly data
+        function loadMonthlyData() {
+            const bulan = document.getElementById('bulanFilter').value;
+            const tahun = document.getElementById('tahunFilter').value;
+            const kelas = document.getElementById('kelasFilterMonthly').value;
+
+            if (!bulan || !tahun || !kelas) {
+                showToast('Silakan pilih bulan, tahun, dan kelas terlebih dahulu!', 'error');
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('monthlyResultsContainer').classList.add('hidden');
+            document.getElementById('noDataState').classList.add('hidden');
+
+            // Process monthly data
+            setTimeout(() => {
+                const filteredData = sheetsData.filter(item => item.kelas === kelas);
+                
+                if (filteredData.length === 0) {
+                    document.getElementById('loadingState').classList.add('hidden');
+                    document.getElementById('noDataState').classList.remove('hidden');
+                    showToast('Tidak ada data siswa untuk kelas yang dipilih', 'error');
+                    return;
+                }
+
+                displayMonthlyData(filteredData, bulan, tahun, kelas);
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('monthlyResultsContainer').classList.remove('hidden');
+                showToast('Data rekap bulanan berhasil dimuat', 'success');
+            }, 500);
+        }
+
+        // Function to display monthly data
+        function displayMonthlyData(data, bulan, tahun, kelas) {
+            const monthNames = {
+                '01': 'Januari', '02': 'Februari', '03': 'Maret', '04': 'April',
+                '05': 'Mei', '06': 'Juni', '07': 'Juli', '08': 'Agustus',
+                '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Desember'
+            };
+
+            // Update table title
+            document.getElementById('monthlyTableTitle').textContent = 
+                `Rekap Kehadiran Kelas ${kelas} - ${monthNames[bulan]} ${tahun}`;
+
+            // Calculate monthly statistics for each student
+            const monthlyStats = data.map(student => {
+                const stats = {
+                    no: student.no,
+                    nisn: student.nisn,
+                    nama: student.nama,
+                    hadir: 0,
+                    alpa: 0,
+                    izin: 0,
+                    sakit: 0,
+                    terlambat: 0,
+                    bolos: 0,
+                    totalDays: 0
+                };
+
+                // Count attendance for the selected month
+                Object.keys(student.dates).forEach(date => {
+                    const dateObj = new Date(date);
+                    if (dateObj.getFullYear() == tahun && 
+                        String(dateObj.getMonth() + 1).padStart(2, '0') === bulan) {
+                        
+                        const status = student.dates[date].toLowerCase();
+                        stats.totalDays++;
+                        
+                        switch(status) {
+                            case 'hadir': stats.hadir++; break;
+                            case 'alpa': stats.alpa++; break;
+                            case 'izin': stats.izin++; break;
+                            case 'sakit': stats.sakit++; break;
+                            case 'terlambat': stats.terlambat++; break;
+                            case 'bolos': stats.bolos++; break;
+                        }
+                    }
+                });
+
+                // Calculate attendance percentage
+                stats.attendancePercentage = stats.totalDays > 0 ? 
+                    Math.round((stats.hadir / stats.totalDays) * 100) : 0;
+
+                return stats;
+            });
+
+            // Calculate totals for summary cards
+            const totals = {
+                hadir: monthlyStats.reduce((sum, student) => sum + student.hadir, 0),
+                alpa: monthlyStats.reduce((sum, student) => sum + student.alpa, 0),
+                izin: monthlyStats.reduce((sum, student) => sum + student.izin, 0),
+                sakit: monthlyStats.reduce((sum, student) => sum + student.sakit, 0),
+                terlambat: monthlyStats.reduce((sum, student) => sum + student.terlambat, 0),
+                bolos: monthlyStats.reduce((sum, student) => sum + student.bolos, 0)
+            };
+
+            // Update summary cards
+            animateCounter('monthlyCountHadir', totals.hadir);
+            animateCounter('monthlyCountAlpa', totals.alpa);
+            animateCounter('monthlyCountIzin', totals.izin);
+            animateCounter('monthlyCountSakit', totals.sakit);
+            animateCounter('monthlyCountTerlambat', totals.terlambat);
+            animateCounter('monthlyCountBolos', totals.bolos);
+
+            // Generate table rows
+            const tbody = document.getElementById('monthlyDataTableBody');
+            tbody.innerHTML = '';
+
+            monthlyStats.forEach((student, index) => {
+                const row = document.createElement('tr');
+                
+                // Color code attendance percentage
+                let percentageClass = 'background: #fee2e2; color: #991b1b;';
+                if (student.attendancePercentage >= 90) percentageClass = 'background: #dcfce7; color: #166534;';
+                else if (student.attendancePercentage >= 75) percentageClass = 'background: #fef3c7; color: #92400e;';
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${student.nisn}</td>
+                    <td style="font-weight: 500;">${student.nama}</td>
+                    <td style="text-align: center;">${student.hadir}</td>
+                    <td style="text-align: center;">${student.alpa}</td>
+                    <td style="text-align: center;">${student.izin}</td>
+                    <td style="text-align: center;">${student.sakit}</td>
+                    <td style="text-align: center;">${student.terlambat}</td>
+                    <td style="text-align: center;">${student.bolos}</td>
+                    <td style="text-align: center; font-weight: 500;">${student.totalDays}</td>
+                    <td style="text-align: center;">
+                        <span style="padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; ${percentageClass}">
+                            ${student.attendancePercentage}%
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Set default date to today
+        document.getElementById('tanggalFilter').value = new Date().toISOString().split('T')[0];
+        
+        // Set default month to current month
+        const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
+        document.getElementById('bulanFilter').value = currentMonth;
+
+        function loadData() {
+            const tanggal = document.getElementById('tanggalFilter').value;
+            const kelas = document.getElementById('kelasFilter').value;
+
+            if (!tanggal || !kelas) {
+                showToast('Silakan pilih tanggal dan kelas terlebih dahulu!', 'error');
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('resultsContainer').classList.add('hidden');
+            document.getElementById('noDataState').classList.add('hidden');
+
+            // Filter data from Google Sheets
+            setTimeout(() => {
+                const filteredData = sheetsData.filter(item => item.kelas === kelas);
+                
+                if (filteredData.length === 0) {
+                    document.getElementById('loadingState').classList.add('hidden');
+                    document.getElementById('noDataState').classList.remove('hidden');
+                    showToast('Tidak ada data siswa untuk kelas yang dipilih', 'error');
+                    return;
+                }
+
+                displayData(filteredData, tanggal, kelas);
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('resultsContainer').classList.remove('hidden');
+                showToast('Data kehadiran berhasil dimuat', 'success');
+            }, 500);
+        }
+
+        function displayData(data, tanggal, kelas) {
+            // Update table title
+            const formattedDate = new Date(tanggal).toLocaleDateString('id-ID', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('tableTitle').textContent = `Data Kehadiran Kelas ${kelas} - ${formattedDate}`;
+
+            // Count status
+            const counts = {hadir: 0, alpa: 0, izin: 0, sakit: 0, terlambat: 0, bolos: 0};
+            
+            // Generate table rows
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach((student, index) => {
+                const status = student.dates[tanggal] || '-';
+                
+                // Count status
+                switch(status.toLowerCase()) {
+                    case 'hadir': counts.hadir++; break;
+                    case 'alpa': counts.alpa++; break;
+                    case 'izin': counts.izin++; break;
+                    case 'sakit': counts.sakit++; break;
+                    case 'terlambat': counts.terlambat++; break;
+                    case 'bolos': counts.bolos++; break;
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${student.rombel}</td>
+                    <td>${student.kelas}</td>
+                    <td>${student.nisn}</td>
+                    <td style="font-weight: 500;">${student.nama}</td>
+                    
+                    <td style="text-align: center;">
+                        <span class="status-badge status-${status.toLowerCase()}">
+                            ${status}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update summary cards with animation
+            animateCounter('countHadir', counts.hadir);
+            animateCounter('countAlpa', counts.alpa);
+            animateCounter('countIzin', counts.izin);
+            animateCounter('countSakit', counts.sakit);
+            animateCounter('countTerlambat', counts.terlambat);
+            animateCounter('countBolos', counts.bolos);
+        }
+
+        // Function to animate counter
+        function animateCounter(elementId, targetValue) {
+            const element = document.getElementById(elementId);
+            const startValue = 0;
+            const duration = 1000;
+            const startTime = performance.now();
+
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const currentValue = Math.floor(startValue + (targetValue - startValue) * progress);
+                
+                element.textContent = currentValue;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                }
+            }
+            
+            requestAnimationFrame(updateCounter);
+        }
+
+        // Export functions for Daily Report
+        function exportDailyToExcel() {
+            try {
+                const tanggal = document.getElementById('tanggalFilter').value;
+                const kelas = document.getElementById('kelasFilter').value;
+                
+                if (!tanggal || !kelas) {
+                    showToast('Tidak ada data untuk diekspor!', 'error');
+                    return;
+                }
+
+                const filteredData = sheetsData.filter(item => item.kelas === kelas);
+                
+                if (filteredData.length === 0) {
+                    showToast('Tidak ada data siswa untuk kelas ini!', 'error');
+                    return;
+                }
+
+                // Count statistics
+                const counts = {hadir: 0, alpa: 0, izin: 0, sakit: 0, terlambat: 0, bolos: 0};
+                
+                // Prepare data for Excel
+                const excelData = [];
+                
+                // Add header with styling info
+                excelData.push(['LAPORAN KEHADIRAN HARIAN']);
+                excelData.push([`Tanggal: ${new Date(tanggal).toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric', 
+                    month: 'long',
+                    day: 'numeric'
+                })}`]);
+                excelData.push([`Kelas: ${kelas}`]);
+                excelData.push([`Dicetak pada: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`]);
+                excelData.push([]);
+                
+                // Add table headers
+                excelData.push(['No', 'Rombel', 'Kelas', 'NISN', 'Nama Siswa', 'Semester', 'Status']);
+                
+                // Add data rows and count statistics
+                filteredData.forEach((student, index) => {
+                    const status = student.dates[tanggal] || '-';
+                    
+                    // Count status
+                    switch(status.toLowerCase()) {
+                        case 'hadir': counts.hadir++; break;
+                        case 'alpa': counts.alpa++; break;
+                        case 'izin': counts.izin++; break;
+                        case 'sakit': counts.sakit++; break;
+                        case 'terlambat': counts.terlambat++; break;
+                        case 'bolos': counts.bolos++; break;
+                    }
+                    
+                    excelData.push([
+                        index + 1,
+                        student.rombel,
+                        student.kelas,
+                        student.nisn,
+                        student.nama,
+                        student.semester,
+                        status
+                    ]);
+                });
+
+                // Add summary
+                excelData.push([]);
+                excelData.push(['RINGKASAN KEHADIRAN']);
+                excelData.push(['Hadir', counts.hadir]);
+                excelData.push(['Alpa', counts.alpa]);
+                excelData.push(['Izin', counts.izin]);
+                excelData.push(['Sakit', counts.sakit]);
+                excelData.push(['Terlambat', counts.terlambat]);
+                excelData.push(['Bolos', counts.bolos]);
+                excelData.push(['Total Siswa', filteredData.length]);
+
+                // Create workbook and worksheet
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(excelData);
+                
+                // Set column widths
+                const colWidths = [
+                    {wch: 5},   // No
+                    {wch: 10},  // Rombel
+                    {wch: 10},  // Kelas
+                    {wch: 15},  // NISN
+                    {wch: 25},  // Nama
+                    {wch: 10},  // Semester
+                    {wch: 12}   // Status
+                ];
+                ws['!cols'] = colWidths;
+                
+                // Add worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, 'Kehadiran Harian');
+                
+                // Generate filename with safe characters
+                const safeKelas = kelas.replace(/[^a-zA-Z0-9]/g, '_');
+                const fileName = `Kehadiran_Harian_${safeKelas}_${tanggal}.xlsx`;
+                
+                // Save file
+                XLSX.writeFile(wb, fileName);
+                
+                // Show success message
+                showToast('File Excel berhasil diunduh!', 'success');
+                
+            } catch (error) {
+                console.error('Error exporting to Excel:', error);
+                showToast('Terjadi kesalahan saat mengekspor ke Excel. Silakan coba lagi.', 'error');
+            }
+        }
+
+        function printDailyToPDF() {
+            try {
+                const tanggal = document.getElementById('tanggalFilter').value;
+                const kelas = document.getElementById('kelasFilter').value;
+                
+                if (!tanggal || !kelas) {
+                    showToast('Tidak ada data untuk dicetak!', 'error');
+                    return;
+                }
+
+                const filteredData = sheetsData.filter(item => item.kelas === kelas);
+                
+                if (filteredData.length === 0) {
+                    showToast('Tidak ada data siswa untuk kelas ini!', 'error');
+                    return;
+                }
+
+                const formattedDate = new Date(tanggal).toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                // Count statistics
+                const counts = {hadir: 0, alpa: 0, izin: 0, sakit: 0, terlambat: 0, bolos: 0};
+
+                // Create PDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                // Add title
+                doc.setFontSize(18);
+                doc.setFont('helvetica', 'bold');
+                doc.text('LAPORAN KEHADIRAN HARIAN', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+                
+                // Add info
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Tanggal: ${formattedDate}`, 20, 35);
+                doc.text(`Kelas: ${kelas}`, 20, 45);
+                doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`, 20, 55);
+                
+                // Prepare table data and count statistics
+                const tableData = filteredData.map((student, index) => {
+                    const status = student.dates[tanggal] || '-';
+                    
+                    // Count status
+                    switch(status.toLowerCase()) {
+                        case 'hadir': counts.hadir++; break;
+                        case 'alpa': counts.alpa++; break;
+                        case 'izin': counts.izin++; break;
+                        case 'sakit': counts.sakit++; break;
+                        case 'terlambat': counts.terlambat++; break;
+                        case 'bolos': counts.bolos++; break;
+                    }
+                    
+                    return [
+                        index + 1,
+                        student.rombel,
+                        student.kelas,
+                        student.nisn,
+                        student.nama.length > 20 ? student.nama.substring(0, 20) + '...' : student.nama,
+                        student.semester,
+                        status
+                    ];
+                });
+
+                // Add main table
+                doc.autoTable({
+                    head: [['No', 'Rombel', 'Kelas', 'NISN', 'Nama Siswa', 'Semester', 'Status']],
+                    body: tableData,
+                    startY: 65,
+                    styles: { 
+                        fontSize: 9,
+                        cellPadding: 3,
+                        overflow: 'linebreak'
+                    },
+                    headStyles: { 
+                        fillColor: [66, 139, 202],
+                        textColor: 255,
+                        fontStyle: 'bold'
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 15 }, // No
+                        1: { cellWidth: 20 }, // Rombel
+                        2: { cellWidth: 20 }, // Kelas
+                        3: { cellWidth: 25 }, // NISN
+                        4: { cellWidth: 50 }, // Nama
+                        5: { cellWidth: 20 }, // Semester
+                        6: { cellWidth: 25 }  // Status
+                    },
+                    alternateRowStyles: { fillColor: [245, 245, 245] }
+                });
+
+                // Add summary table
+                const finalY = doc.lastAutoTable.finalY + 15;
+                
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('RINGKASAN KEHADIRAN', 20, finalY);
+                
+                const summaryData = [
+                    ['Hadir', counts.hadir],
+                    ['Alpa', counts.alpa],
+                    ['Izin', counts.izin],
+                    ['Sakit', counts.sakit],
+                    ['Terlambat', counts.terlambat],
+                    ['Total Siswa', filteredData.length]
+                ];
+
+                doc.autoTable({
+                    body: summaryData,
+                    startY: finalY + 10,
+                    styles: { 
+                        fontSize: 11,
+                        cellPadding: 4
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 40, fontStyle: 'bold' },
+                        1: { cellWidth: 30, halign: 'center' }
+                    },
+                    theme: 'grid'
+                });
+
+                // Generate filename with safe characters
+                const safeKelas = kelas.replace(/[^a-zA-Z0-9]/g, '_');
+                const fileName = `Kehadiran_Harian_${safeKelas}_${tanggal}.pdf`;
+                
+                // Save PDF
+                doc.save(fileName);
+                
+                // Show success message
+                showToast('File PDF berhasil diunduh!', 'success');
+                
+            } catch (error) {
+                console.error('Error creating PDF:', error);
+                showToast('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.', 'error');
+            }
+        }
+
+        // Export functions for Monthly Report
+        function exportMonthlyToExcel() {
+            try {
+                const bulan = document.getElementById('bulanFilter').value;
+                const tahun = document.getElementById('tahunFilter').value;
+                const kelas = document.getElementById('kelasFilterMonthly').value;
+                
+                if (!bulan || !tahun || !kelas) {
+                    showToast('Tidak ada data untuk diekspor!', 'error');
+                    return;
+                }
+
+                const monthNames = {
+                    '01': 'Januari', '02': 'Februari', '03': 'Maret', '04': 'April',
+                    '05': 'Mei', '06': 'Juni', '07': 'Juli', '08': 'Agustus',
+                    '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Desember'
+                };
+
+                const filteredData = sheetsData.filter(item => item.kelas === kelas);
+                
+                if (filteredData.length === 0) {
+                    showToast('Tidak ada data siswa untuk kelas ini!', 'error');
+                    return;
+                }
+                
+                // Calculate monthly statistics
+                const monthlyStats = filteredData.map(student => {
+                    const stats = {
+                        no: student.no,
+                        nisn: student.nisn,
+                        nama: student.nama,
+                        hadir: 0,
+                        alpa: 0,
+                        izin: 0,
+                        sakit: 0,
+                        terlambat: 0,
+                        bolos: 0,
+                        totalDays: 0
+                    };
+
+                    Object.keys(student.dates).forEach(date => {
+                        const dateObj = new Date(date);
+                        if (dateObj.getFullYear() == tahun && 
+                            String(dateObj.getMonth() + 1).padStart(2, '0') === bulan) {
+                            
+                            const status = student.dates[date].toLowerCase();
+                            stats.totalDays++;
+                            
+                            switch(status) {
+                                case 'hadir': stats.hadir++; break;
+                                case 'alpa': stats.alpa++; break;
+                                case 'izin': stats.izin++; break;
+                                case 'sakit': stats.sakit++; break;
+                                case 'terlambat': stats.terlambat++; break;
+                            }
+                        }
+                    });
+
+                    stats.attendancePercentage = stats.totalDays > 0 ? 
+                        Math.round((stats.hadir / stats.totalDays) * 100) : 0;
+
+                    return stats;
+                });
+
+                // Calculate totals
+                const totals = {
+                    hadir: monthlyStats.reduce((sum, student) => sum + student.hadir, 0),
+                    alpa: monthlyStats.reduce((sum, student) => sum + student.alpa, 0),
+                    izin: monthlyStats.reduce((sum, student) => sum + student.izin, 0),
+                    sakit: monthlyStats.reduce((sum, student) => sum + student.sakit, 0),
+                    terlambat: monthlyStats.reduce((sum, student) => sum + student.terlambat, 0)
+                };
+
+                // Prepare data for Excel
+                const excelData = [];
+                
+                // Add header
+                excelData.push(['LAPORAN KEHADIRAN BULANAN']);
+                excelData.push([`Periode: ${monthNames[bulan]} ${tahun}`]);
+                excelData.push([`Kelas: ${kelas}`]);
+                excelData.push([`Dicetak pada: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`]);
+                excelData.push([]);
+                
+                // Add table headers
+                excelData.push(['No', 'NISN', 'Nama Siswa', 'Hadir', 'Alpa', 'Izin', 'Sakit', 'Terlambat', 'Total Hari', '% Kehadiran']);
+                
+                // Add data rows
+                monthlyStats.forEach((student, index) => {
+                    excelData.push([
+                        index + 1,
+                        student.nisn,
+                        student.nama,
+                        student.hadir,
+                        student.alpa,
+                        student.izin,
+                        student.sakit,
+                        student.terlambat,
+                        student.totalDays,
+                        student.attendancePercentage
+                    ]);
+                });
+
+                // Add summary
+                excelData.push([]);
+                excelData.push(['RINGKASAN KEHADIRAN KELAS']);
+                excelData.push(['Total Hadir', totals.hadir]);
+                excelData.push(['Total Alpa', totals.alpa]);
+                excelData.push(['Total Izin', totals.izin]);
+                excelData.push(['Total Sakit', totals.sakit]);
+                excelData.push(['Total Terlambat', totals.terlambat]);
+                excelData.push(['Jumlah Siswa', filteredData.length]);
+
+                // Create workbook and worksheet
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(excelData);
+                
+                // Set column widths
+                const colWidths = [
+                    {wch: 5},   // No
+                    {wch: 15},  // NISN
+                    {wch: 25},  // Nama
+                    {wch: 8},   // Hadir
+                    {wch: 8},   // Alpa
+                    {wch: 8},   // Izin
+                    {wch: 8},   // Sakit
+                    {wch: 10},  // Terlambat
+                    {wch: 10},  // Total Hari
+                    {wch: 12}   // % Kehadiran
+                ];
+                ws['!cols'] = colWidths;
+                
+                // Add worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, 'Kehadiran Bulanan');
+                
+                // Generate filename with safe characters
+                const safeKelas = kelas.replace(/[^a-zA-Z0-9]/g, '_');
+                const fileName = `Kehadiran_Bulanan_${safeKelas}_${monthNames[bulan]}_${tahun}.xlsx`;
+                
+                // Save file
+                XLSX.writeFile(wb, fileName);
+                
+                // Show success message
+                showToast('File Excel berhasil diunduh!', 'success');
+                
+            } catch (error) {
+                console.error('Error exporting monthly data to Excel:', error);
+                showToast('Terjadi kesalahan saat mengekspor ke Excel. Silakan coba lagi.', 'error');
+            }
+        }
+
+        function printMonthlyToPDF() {
+            try {
+                const bulan = document.getElementById('bulanFilter').value;
+                const tahun = document.getElementById('tahunFilter').value;
+                const kelas = document.getElementById('kelasFilterMonthly').value;
+                
+                if (!bulan || !tahun || !kelas) {
+                    showToast('Tidak ada data untuk dicetak!', 'error');
+                    return;
+                }
+
+                const monthNames = {
+                    '01': 'Januari', '02': 'Februari', '03': 'Maret', '04': 'April',
+                    '05': 'Mei', '06': 'Juni', '07': 'Juli', '08': 'Agustus',
+                    '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Desember'
+                };
+
+                const filteredData = sheetsData.filter(item => item.kelas === kelas);
+                
+                if (filteredData.length === 0) {
+                    showToast('Tidak ada data siswa untuk kelas ini!', 'error');
+                    return;
+                }
+                
+                // Calculate monthly statistics
+                const monthlyStats = filteredData.map(student => {
+                    const stats = {
+                        no: student.no,
+                        nisn: student.nisn,
+                        nama: student.nama,
+                        hadir: 0,
+                        alpa: 0,
+                        izin: 0,
+                        sakit: 0,
+                        terlambat: 0,
+                        bolos: 0,
+                        totalDays: 0
+                    };
+
+                    Object.keys(student.dates).forEach(date => {
+                        const dateObj = new Date(date);
+                        if (dateObj.getFullYear() == tahun && 
+                            String(dateObj.getMonth() + 1).padStart(2, '0') === bulan) {
+                            
+                            const status = student.dates[date].toLowerCase();
+                            stats.totalDays++;
+                            
+                            switch(status) {
+                                case 'hadir': stats.hadir++; break;
+                                case 'alpa': stats.alpa++; break;
+                                case 'izin': stats.izin++; break;
+                                case 'sakit': stats.sakit++; break;
+                                case 'terlambat': stats.terlambat++; break;
+                            }
+                        }
+                    });
+
+                    stats.attendancePercentage = stats.totalDays > 0 ? 
+                        Math.round((stats.hadir / stats.totalDays) * 100) : 0;
+
+                    return stats;
+                });
+
+                // Calculate totals
+                const totals = {
+                    hadir: monthlyStats.reduce((sum, student) => sum + student.hadir, 0),
+                    alpa: monthlyStats.reduce((sum, student) => sum + student.alpa, 0),
+                    izin: monthlyStats.reduce((sum, student) => sum + student.izin, 0),
+                    sakit: monthlyStats.reduce((sum, student) => sum + student.sakit, 0),
+                    terlambat: monthlyStats.reduce((sum, student) => sum + student.terlambat, 0)
+                };
+
+                // Create PDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                // Add title
+                doc.setFontSize(18);
+                doc.setFont('helvetica', 'bold');
+                doc.text('LAPORAN KEHADIRAN BULANAN', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+                
+                // Add info
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Periode: ${monthNames[bulan]} ${tahun}`, 20, 35);
+                doc.text(`Kelas: ${kelas}`, 20, 45);
+                doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`, 20, 55);
+                
+                // Prepare table data
+                const tableData = monthlyStats.map((student, index) => [
+                    index + 1,
+                    student.nisn,
+                    student.nama.length > 18 ? student.nama.substring(0, 18) + '...' : student.nama,
+                    student.hadir,
+                    student.alpa,
+                    student.izin,
+                    student.sakit,
+                    student.terlambat,
+                    student.totalDays,
+                    `${student.attendancePercentage}%`
+                ]);
+
+                // Add main table
+                doc.autoTable({
+                    head: [['No', 'NISN', 'Nama Siswa', 'Hadir', 'Alpa', 'Izin', 'Sakit', 'Terlambat', 'Total', '% Hadir']],
+                    body: tableData,
+                    startY: 65,
+                    styles: { 
+                        fontSize: 9,
+                        cellPadding: 2,
+                        overflow: 'linebreak'
+                    },
+                    headStyles: { 
+                        fillColor: [34, 197, 94],
+                        textColor: 255,
+                        fontStyle: 'bold'
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 12 }, // No
+                        1: { cellWidth: 20 }, // NISN
+                        2: { cellWidth: 40 }, // Nama
+                        3: { cellWidth: 15 }, // Hadir
+                        4: { cellWidth: 15 }, // Alpa
+                        5: { cellWidth: 15 }, // Izin
+                        6: { cellWidth: 15 }, // Sakit
+                        7: { cellWidth: 18 }, // Terlambat
+                        8: { cellWidth: 15 }, // Total
+                        9: { cellWidth: 20 }  // %
+                    },
+                    alternateRowStyles: { fillColor: [245, 245, 245] }
+                });
+
+                // Add summary table
+                const finalY = doc.lastAutoTable.finalY + 15;
+                
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('RINGKASAN KEHADIRAN KELAS', 20, finalY);
+                
+                const summaryData = [
+                    ['Total Hadir', totals.hadir],
+                    ['Total Alpa', totals.alpa],
+                    ['Total Izin', totals.izin],
+                    ['Total Sakit', totals.sakit],
+                    ['Total Terlambat', totals.terlambat],
+                    ['Jumlah Siswa', filteredData.length]
+                ];
+
+                doc.autoTable({
+                    body: summaryData,
+                    startY: finalY + 10,
+                    styles: { 
+                        fontSize: 11,
+                        cellPadding: 4
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 50, fontStyle: 'bold' },
+                        1: { cellWidth: 30, halign: 'center' }
+                    },
+                    theme: 'grid'
+                });
+
+                // Generate filename with safe characters
+                const safeKelas = kelas.replace(/[^a-zA-Z0-9]/g, '_');
+                const fileName = `Kehadiran_Bulanan_${safeKelas}_${monthNames[bulan]}_${tahun}.pdf`;
+                
+                // Save PDF
+                doc.save(fileName);
+                
+                // Show success message
+                showToast('File PDF berhasil diunduh!', 'success');
+                
+            } catch (error) {
+                console.error('Error creating monthly PDF:', error);
+                showToast('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.', 'error');
+            }
+        }
+
+        // Initialize page on load
+        window.addEventListener('load', async () => {
+            // Show loading state while fetching data
+            document.getElementById('loadingState').classList.remove('hidden');
+            
+            // Load data from Google Sheets
+            await loadSheetsData();
+            
+            // Hide loading and show no data state initially
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('noDataState').classList.remove('hidden');
+        });
+    </script>
+
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a38f1de6f7604a',t:'MTc1NDM2ODIyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
