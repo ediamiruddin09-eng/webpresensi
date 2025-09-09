@@ -1559,7 +1559,7 @@
                 }
 
                 // Count statistics
-                const counts = {alpa: 0, izin: 0, sakit: 0, terlambat: 0, bolos: 0};
+                const counts = {hadir: 0, alpa: 0, izin: 0, sakit: 0, terlambat: 0, bolos: 0};
                 
                 // Prepare data for Excel
                 const excelData = [];
@@ -1581,11 +1581,11 @@
                 
                 // Add data rows and count statistics
                 filteredData.forEach((student, index) => {
-                    const status = student.dates[tanggal] || '-';
+                    const status = student.dates[tanggal] || 'TIDAK ADA DATA';
                     
                     // Count status
                     switch(status.toLowerCase()) {
-                        
+                        case 'hadir': counts.hadir++; break;
                         case 'alpa': counts.alpa++; break;
                         case 'izin': counts.izin++; break;
                         case 'sakit': counts.sakit++; break;
@@ -1607,7 +1607,7 @@
                 // Add summary
                 excelData.push([]);
                 excelData.push(['RINGKASAN KEHADIRAN']);
-                
+                excelData.push(['Hadir', counts.hadir]);
                 excelData.push(['Alpa', counts.alpa]);
                 excelData.push(['Izin', counts.izin]);
                 excelData.push(['Sakit', counts.sakit]);
@@ -2137,4 +2137,5 @@
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a38f1de6f7604a',t:'MTc1NDM2ODIyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 
 </html>
+
 
