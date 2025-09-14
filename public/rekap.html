@@ -886,57 +886,60 @@
         <!-- Daily Results -->
         <div id="resultsContainer" class="hidden space-y-6">
             <div class="stats-grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+               <div class="bg-white rounded-lg shadow-sm border p-4">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-600 rounded-xl mr-4">
+                            <i class="fas fa-users text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 text-sm">Total Siswa</p>
+                            <p class="text-xl font-bold text-gray-800" id="totalStudents">0</p>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="bg-white rounded-lg shadow-sm border p-4">
-                <div class="flex items-center">
-                    <div class="bg-blue-100 text-blue-600 p-3 rounded-lg mr-3">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div>
-                        <p class="text-gray-600 text-sm">Total Siswa</p>
-                        <p class="text-xl font-bold text-gray-800" id="totalStudents">0</p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm border p-4">
-                <div class="flex items-center">
-                    <div class="bg-green-100 text-green-600 p-3 rounded-lg mr-3">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div>
-                        <p class="text-gray-600 text-sm">Hadir</p>
-                        <p class="text-xl font-bold text-green-600" id="presentCount">0</p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 flex items-center justify-center bg-green-100 text-green-600 rounded-xl mr-4">
+                            <i class="fas fa-check-circle text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 text-sm">Hadir</p>
+                            <p class="text-xl font-bold text-green-600" id="presentCount">0</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm border p-4">
-                <div class="flex items-center">
-                    <div class="bg-red-100 text-red-600 p-3 rounded-lg mr-3">
-                        <i class="fas fa-times-circle"></i>
-                    </div>
-                    <div>
-                        <p class="text-gray-600 text-sm">Tidak Hadir</p>
-                        <p class="text-xl font-bold text-red-600" id="absentCount">0</p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm border p-4">
-                <div class="flex items-center">
-                    <div class="bg-yellow-100 text-yellow-600 p-3 rounded-lg mr-3">
-                        <i class="fas fa-percentage"></i>
-                    </div>
-                    <div>
-                        <p class="text-gray-600 text-sm">Persentase Hadir</p>
-                        <p class="text-xl font-bold text-yellow-600" id="attendanceRate">0%</p>
+                
+                <div class="bg-white rounded-lg shadow-sm border p-4">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 flex items-center justify-center bg-red-100 text-red-600 rounded-xl mr-4">
+                            <i class="fas fa-times-circle text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 text-sm">Tidak Hadir</p>
+                            <p class="text-xl font-bold text-red-600" id="absentCount">0</p>
+                        </div>
                     </div>
                 </div>
-            </div>
+                
+                <div class="bg-white rounded-lg shadow-sm border p-4">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 flex items-center justify-center bg-yellow-100 text-yellow-600 rounded-xl mr-4">
+                            <i class="fas fa-percentage text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 text-sm">Persentase Hadir</p>
+                            <p class="text-xl font-bold text-yellow-600" id="attendanceRate">0%</p>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="stats-grid">                
             <div class="bg-white rounded-lg shadow-sm border p-4">
                 <div class="flex items-center">
-                    <div class="bg-red-100 text-red-600 p-2 rounded-lg mr-3">
-                        <i class="fas fa-times text-sm"></i>
+                    <div class="w-10 h-10 flex items-center justify-center bg-red-100 text-red-600 rounded-xl mr-3">
+                        <i class="fas fa-times text-lg"></i>
                     </div>
                     <div>
                         <p class="text-gray-600 text-xs">Alpa</p>
@@ -944,10 +947,11 @@
                     </div>
                 </div>
             </div>
+
             <div class="bg-white rounded-lg shadow-sm border p-4">
                 <div class="flex items-center">
-                    <div class="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3">
-                        <i class="fas fa-thermometer-half text-sm"></i>
+                    <div class="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-xl mr-3">
+                        <i class="fas fa-thermometer-half text-lg"></i>
                     </div>
                     <div>
                         <p class="text-gray-600 text-xs">Sakit</p>
@@ -955,10 +959,11 @@
                     </div>
                 </div>
             </div>
+
             <div class="bg-white rounded-lg shadow-sm border p-4">
                 <div class="flex items-center">
-                    <div class="bg-yellow-100 text-yellow-600 p-2 rounded-lg mr-3">
-                        <i class="fas fa-hand-paper text-sm"></i>
+                    <div class="w-10 h-10 flex items-center justify-center bg-yellow-100 text-yellow-600 rounded-xl mr-3">
+                        <i class="fas fa-hand-paper text-lg"></i>
                     </div>
                     <div>
                         <p class="text-gray-600 text-xs">Izin</p>
@@ -966,10 +971,11 @@
                     </div>
                 </div>
             </div>
+
             <div class="bg-white rounded-lg shadow-sm border p-4">
                 <div class="flex items-center">
-                    <div class="bg-purple-100 text-purple-600 p-2 rounded-lg mr-3">
-                        <i class="fas fa-user-slash text-sm"></i>
+                    <div class="w-10 h-10 flex items-center justify-center bg-purple-100 text-purple-600 rounded-xl mr-3">
+                        <i class="fas fa-user-slash text-lg"></i>
                     </div>
                     <div>
                         <p class="text-gray-600 text-xs">Bolos</p>
@@ -977,10 +983,11 @@
                     </div>
                 </div>
             </div>
+
             <div class="bg-white rounded-lg shadow-sm border p-4">
                 <div class="flex items-center">
-                    <div class="bg-orange-100 text-orange-600 p-2 rounded-lg mr-3">
-                        <i class="fas fa-clock text-sm"></i>
+                    <div class="w-10 h-10 flex items-center justify-center bg-orange-100 text-orange-600 rounded-xl mr-3">
+                        <i class="fas fa-clock text-lg"></i>
                     </div>
                     <div>
                         <p class="text-gray-600 text-xs">Terlambat</p>
@@ -988,10 +995,11 @@
                     </div>
                 </div>
             </div>
+
             <div class="bg-white rounded-lg shadow-sm border p-4">
                 <div class="flex items-center">
-                    <div class="bg-gray-100 text-gray-600 p-2 rounded-lg mr-3">
-                        <i class="fas fa-question text-sm"></i>
+                    <div class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-600 rounded-xl mr-3">
+                        <i class="fas fa-question text-lg"></i>
                     </div>
                     <div>
                         <p class="text-gray-600 text-xs">Belum Presensi</p>
@@ -2610,6 +2618,7 @@
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a38f1de6f7604a',t:'MTc1NDM2ODIyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 
 </html>
+
 
 
 
