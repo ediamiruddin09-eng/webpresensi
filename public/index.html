@@ -977,9 +977,10 @@ updateStatistics();
                         div.innerHTML = `
                             <div class="flex items-center space-x-2 w-full sm:w-auto">
                                 <div class="relative flex-shrink-0">
-                                    <div class="w-8 h-8 rounded-lg ${statusClass.replace('bg-', 'bg-').replace('text-white', '')} flex items-center justify-center flex-shrink-0">
-        <i class="text-xs ${getStatusIcon(item.keterangan)}"></i>
-    </div>
+                                   <div class="w-8 h-8 rounded-full ${statusClass} 
+                                        flex items-center justify-center text-white font-bold shadow-sm text-xs">
+                                        ${getStatusIcon(item.keterangan)}
+                                    </div>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center space-x-1 mb-0 flex-wrap">
