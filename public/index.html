@@ -402,12 +402,13 @@
             </div>
         </div>
     </header> -->
-    <header class="glass sticky top-0 z-40 border-b border-white/20">
+    <header class="glass sticky top-0 z-40 border-b border-gray-200/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16 sm:h-20">
+            
+            <!-- Bagian Kiri: Logo dan Judul -->
             <div class="flex items-center space-x-2 sm:space-x-4">
-                <div class="w-9 h-9 sm:w-11 sm:h-11  rounded-xl flex items-center justify-center">
-                    <!-- <i class="fas fa-user-check text-white text-sm sm:text-lg"></i> -->
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center">
                     <img src="../THIRD LOWER-logo.svg" alt="Logo SMP" class="w-7 h-7 sm:w-9 sm:h-9 inline-block">
                 </div>
                 <div class="hidden sm:block">
@@ -421,31 +422,93 @@
                         Sistem Presensi
                     </h1>
                 </div>
-            </div>      
-            
+            </div>
+
+            <!-- Bagian Tengah: Menu Desktop (Warna Gelap & Primary) -->
+            <nav class="hidden md:flex items-center space-x-8">
+                <!-- Menu Aktif -->
+                <a href="#" onclick="showDashboard()" class="text-primary font-medium border-b-2 border-primary pb-2">
+                    Dashboard
+                </a>
+                <!-- Menu Tidak Aktif -->
+                <a href="#" onclick="showRekap()" class="text-gray-700 hover:text-primary transition-colors font-medium border-b-2 border-transparent hover:border-primary pb-2">
+                    Rekap Presensi
+                </a>
+                <a href="#" onclick="showCetakKartu()" class="text-gray-700 hover:text-primary transition-colors font-medium border-b-2 border-transparent hover:border-primary pb-2">
+                    Cetak Kartu
+                </a>
+            </nav>
+
+            <!-- Bagian Kanan: Tombol & Hamburger -->
             <div class="flex items-center space-x-2 sm:space-x-4">
+                <button id="refreshButton" onclick="manualRefresh()" class="btn-touch bg-white text-primary hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-primary">
+                    <i id="refreshIcon" class="fas fa-sync-alt"></i>
+                    <span class="hidden sm:inline">Refresh</span>
+                </button>
                 <div id="connectionStatus" class="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
                     <div id="statusIndicator" class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     <span id="statusText">Live</span>
                     <span id="lastUpdate" class="text-xs text-gray-400"></span>
                     <span id="nextRefresh" class="text-xs text-blue-400"></span>
+                </div>     
+                
+                <!-- Tombol Hamburger (Warna Gelap) -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-800 hover:bg-gray-200/50 focus:outline-none">
+                        <span class="sr-only">Buka menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
                 </div>
-                <button onclick="checkCard()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
-                    <i class="fas fa-id-card text-sm"></i>
-                    <span class="hidden sm:inline">Cek Kartu Presensi</span>
-                    <span class="sm:hidden">Kartu</span>
-                </button>
-                <button id="refreshButton" onclick="manualRefresh()" class="btn-touch bg-white text-blue-600 hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-blue-200">
-                        <i id="refreshIcon" class="fas fa-sync-alt"></i>
-                        <span class="hidden sm:inline">Refresh</span>
-                        <span class="sm:hidden">Ref</span>
-                </button>
-                 
             </div>
-            
+
+        </div>
+    </div>
+
+    <!-- Panel Menu Mobile (Warna Gelap & Primary) -->
+    <div id="mobile-menu" class="hidden md:hidden">
+        <div class="px-2 pt-2 pb-3 space-y-2 sm:px-3">
+            <!-- Menu Aktif -->
+            <a href="#" onclick="showDashboard()" class="block text-center text-white bg-blue-600 px-3 py-3 rounded-lg text-base font-medium shadow-sm">
+                Dashboard
+            </a>
+            <!-- Menu Tidak Aktif -->
+            <a href="#" onclick="showRekap()" class="block text-center text-gray-800 bg-gray-100 hover:bg-blue-100 hover:text-blue-700 px-3 py-3 rounded-lg text-base font-medium transition-colors shadow-sm">
+                Rekap Presensi
+            </a>
+            <a href="#" onclick="showCetakKartu()" class="block text-center text-gray-800 bg-gray-100 hover:bg-blue-100 hover:text-blue-700 px-3 py-3 rounded-lg text-base font-medium transition-colors shadow-sm">
+                Cetak Kartu
+            </a>
         </div>
     </div>
 </header>
+
+
+
+<script>
+    // Skrip untuk toggle menu mobile
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Anda perlu mendefinisikan fungsi-fungsi ini di file JS utama Anda
+    function showDashboard() {
+        console.log("Menampilkan Dashboard...");
+        // Tambahkan logika untuk menampilkan konten dashboard di sini
+    }
+    function showRekap() {
+        console.log("Menampilkan Rekap Presensi...");
+        // Tambahkan logika untuk menampilkan konten rekap di sini
+    }
+    function showCetakKartu() {
+        console.log("Menampilkan Cetak Kartu...");
+        // Tambahkan logika untuk menampilkan konten cetak kartu di sini
+    }
+</script>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <div class="mb-6 sm:mb-8">
             <div class="text-center mb-6 sm:mb-8">
