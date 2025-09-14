@@ -730,25 +730,22 @@
         // let refreshIntervalId; // Variabel global untuk menyimpan ID dari setInterval
         
         // Toast Notification System
-        function showToast(message, type = 'success', duration = 3000) {
+        // Toast notification function
+        function showToast(message, type = 'info', duration = 4000) {
             const toastContainer = document.getElementById('toastContainer');
+            
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
             
-            const iconMap = {
-                success: 'fas fa-check-circle text-green-500',
-                info: 'fas fa-info-circle text-blue-500',
-                warning: 'fas fa-exclamation-triangle text-yellow-500',
-                error: 'fas fa-times-circle text-red-500'
-            };
-            
             toast.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <i class="${iconMap[type]} mr-3"></i>
-                        <span class="text-gray-800 font-medium">${message}</span>
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 mr-3">
+                        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'} text-xl"></i>
                     </div>
-                    <button onclick="closeToast(this)" class="text-gray-400 hover:text-gray-600 ml-4">
+                    <div class="flex-1">
+                        <p class="font-medium">${message}</p>
+                    </div>
+                    <button class="toast-close" onclick="this.parentElement.parentElement.remove()">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -756,15 +753,17 @@
             
             toastContainer.appendChild(toast);
             
-            // Show toast
-            setTimeout(() => toast.classList.add('show'), 100);
-            
-            // Auto hide
+            // Show toast with animation
             setTimeout(() => {
-                toast.classList.add('hide');
+                toast.classList.add('show');
+            }, 100);
+            
+            // Auto remove toast
+            setTimeout(() => {
+                toast.classList.remove('show');
                 setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
+                    if (toast.parentElement) {
+                        toast.remove();
                     }
                 }, 300);
             }, duration);
