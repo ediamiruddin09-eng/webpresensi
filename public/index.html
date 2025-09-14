@@ -1037,19 +1037,19 @@ updateStatistics();
                 badgeClass = 'bg-green-100 text-green-800';
                 badgeText = 'Hadir';
             } else if (ket.includes('alpa')) {
-                badgeClass = 'bg-red-100 text-red-800';
+                badgeClass = 'bg-red-100 text-red-600';
                 badgeText = 'Alpa';
             } else if (ket.includes('izin')) {
                 badgeClass = 'bg-yellow-100 text-yellow-800';
                 badgeText = 'Izin';
             } else if (ket.includes('sakit')) {
-                badgeClass = 'bg-purple-100 text-purple-800';
+                badgeClass = 'bg-blue-100 text-blue-800';
                 badgeText = 'Sakit';
             } else if (ket.includes('terlambat')) {
                 badgeClass = 'bg-orange-100 text-orange-800';
                 badgeText = 'Terlambat';
             } else {
-                badgeClass = 'bg-gray-100 text-gray-800';
+                badgeClass = 'bg-purple-100 text-purple-800';
                 badgeText = 'Bolos';
             }
             
@@ -1119,24 +1119,27 @@ updateStatistics();
         // }
         
         // Fungsi helper untuk status
+        // Fungsi helper untuk status
         function getStatusClass(keterangan) {
             const ket = keterangan.toLowerCase();
-            if (ket.includes('hadir')) return 'bg-green-500';
-            if (ket.includes('alpa')) return 'bg-red-500';
-            if (ket.includes('izin')) return 'bg-yellow-500';
-            if (ket.includes('sakit')) return 'bg-purple-500';
-            if (ket.includes('terlambat')) return 'bg-orange-500';
-            return 'bg-gray-500';
+            if (ket.includes('hadir')) return 'bg-green-100';
+            if (ket.includes('alpa')) return 'bg-red-100';
+            if (ket.includes('izin')) return 'bg-yellow-100';
+            if (ket.includes('sakit')) return 'bg-blue-100';
+            if (ket.includes('terlambat')) return 'bg-orange-100';
+            return 'bg-purple-100';
         }
+        
+        // ✓
         
         function getStatusIcon(keterangan) {
             const ket = keterangan.toLowerCase();
-            if (ket.includes('hadir')) return '✓';
-            if (ket.includes('alpa')) return '✗';
-            if (ket.includes('izin')) return 'I';
-            if (ket.includes('sakit')) return 'S';
-            if (ket.includes('terlambat')) return '⏰';
-            return 'B';
+            if (ket.includes('hadir')) return '<i class="fas fa-check text-green-600 text-sm"></i>';
+            if (ket.includes('alpa')) return '<i class="fas fa-times text-red-500 text-sm"></i>';
+            if (ket.includes('izin')) return '<i class="fas fa-envelope text-yellow-600 text-sm"></i>';
+            if (ket.includes('sakit')) return '<i class="fas fa-stethoscope text-blue-600 text-sm"></i>';
+            if (ket.includes('terlambat')) return '<i class="fas fa-hourglass-end"></i>';
+            return '<i class="fas fa-user-slash text-purple-600 text-sm"></i>';
         }
         
         // Fungsi untuk cek kartu presensi
