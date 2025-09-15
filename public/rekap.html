@@ -7,13 +7,10 @@
     <title>Sistem Presensi Siswa</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- jsPDF Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>    
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Libraries for Export functionality -->
-<!--     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <!-- Chart.js for data visualization -->
     
@@ -301,6 +298,8 @@
         .status-sakit { background: #ede9fe; color: #6b21a8; }
         .status-terlambat { background: #fed7aa; color: #c2410c; }
         .status-bolos { background: #f3f4f6; color: #374151; }
+        .status-other { background-color: #dadada; color: #374151;}
+        .status-belum-presensi { background-color: #dadada; color: #374151;}
         
         .stats-grid {
             display: grid;
@@ -518,13 +517,7 @@
             display: none !important;
         } */
         
-        .space-y-4 > * + * {
-            margin-top: 16px;
-        }
         
-        .space-y-6 > * + * {
-            margin-top: 24px;
-        }
 
         .chart-container {
             position: relative;
@@ -565,9 +558,6 @@
         .chart-title i {
             color: #667eea;
         }
-
-
-
 
 
 
@@ -618,6 +608,8 @@
         #mainContent.show {
             opacity: 1;
         }
+
+        
         
        
     </style>
@@ -649,7 +641,7 @@
     <!-- Header -->
     
     
-     <header class="glass sticky top-0 z-40 border-b border-gray-200/80">
+    <header class="glass sticky top-0 z-40 border-b border-gray-200/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16 sm:h-20">
             
@@ -678,7 +670,7 @@
                     Dashboard
                 </a>
                 <!-- Menu Tidak Aktif -->
-                <a href="#" onclick="showRekap()" class="text-primary font-medium border-b-2 border-primary pb-2">
+                <a href="https://ediamiruddin09-eng.github.io/webpresensi/public/rekap.html" onclick="showRekap()" class="text-primary font-medium border-b-2 border-primary pb-2">
                     Rekap Presensi
                 </a>
                 <a href="#" onclick="showCetakKartu()" class="text-gray-700 hover:text-primary transition-colors font-medium border-b-2 border-transparent hover:border-primary pb-2">
@@ -688,11 +680,11 @@
 
             <!-- Bagian Kanan: Tombol & Hamburger -->
             <div class="flex items-center space-x-2 sm:space-x-4">
-<!--                 <button id="refreshButton" onclick="manualRefresh()" class="btn-touch bg-white text-primary hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-primary">
+                <!-- <button id="refreshButton" onclick="manualRefresh()" class="btn-touch bg-white text-primary hover:bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium flex items-center space-x-2 text-sm border border-primary">
                     <i id="refreshIcon" class="fas fa-sync-alt"></i>
                     <span class="hidden sm:inline">Refresh</span>
-                </button>
-                <div id="connectionStatus" class="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
+                </button> -->
+                <!-- <div id="connectionStatus" class="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
                     <div id="statusIndicator" class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     <span id="statusText">Live</span>
                     <span id="lastUpdate" class="text-xs text-gray-400"></span>
@@ -721,7 +713,7 @@
                 Dashboard
             </a>
             <!-- Menu Tidak Aktif -->
-            <a href="#" onclick="showRekap()" class="block text-center text-white bg-blue-600 px-3 py-3 rounded-lg text-base font-medium shadow-sm">
+            <a href="https://ediamiruddin09-eng.github.io/webpresensi/public/rekap.html" onclick="showRekap()" class="block text-center text-white bg-blue-600 px-3 py-3 rounded-lg text-base font-medium shadow-sm">
                 Rekap Presensi
             </a>
             <a href="#" onclick="showCetakKartu()" class="block text-center text-gray-800 bg-gray-100 hover:bg-blue-100 hover:text-blue-700 px-3 py-3 rounded-lg text-base font-medium transition-colors shadow-sm">
@@ -777,44 +769,39 @@
     </div>
        
 
-    <!-- Main Content Grid -->
-<div class="grid gap-8">       
-        <!-- <div class="bg-white p-6 animate-fade-in rounded-lg shadow-sm border border-gray-200 w-full max-w-full"> -->
-        <!-- Daily Filter Form -->
-        <div id="dailyFilter" class="card p-5">
-  <div class="section-title mb-4">
-    <i class="fas fa-filter"></i>
-    Filter Data Harian
-  </div>
+<!-- Main Content Grid -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-8">
+    <div id="dailyFilter" class="card p-5">
+        <div class="section-title mb-4">
+            <i class="fas fa-filter"></i>
+            Filter Data Harian
+        </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-    <!-- Tanggal -->
-    <div>
-      <label for="tanggalFilter" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-      <input type="date" id="tanggalFilter"
-             class="w-full border rounded-lg px-3 h-10 focus:outline-none focus:ring focus:ring-blue-300"
-             min="2025-08-01" max="2025-12-31">
-    </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div>
+                <label for="tanggalFilter" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                <input type="date" id="tanggalFilter"
+                    class="w-full border rounded-lg px-3 h-10 focus:outline-none focus:ring focus:ring-blue-300"
+                    min="2025-08-01" max="2025-12-31">
+            </div>
 
-    <!-- Kelas -->
-    <div>
-      <label for="kelasFilter" class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
-      <select id="kelasFilter"
-              class="w-full border rounded-lg px-3 h-10 focus:outline-none focus:ring focus:ring-blue-300">
-        <option value="">Pilih Kelas</option>
-      </select>
-    </div>
+            <div>
+                <label for="kelasFilter" class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                <select id="kelasFilter"
+                    class="w-full border rounded-lg px-3 h-10 focus:outline-none focus:ring focus:ring-blue-300">
+                    <option value="">Pilih Kelas</option>
+                </select>
+            </div>
 
-    <!-- Tombol -->
-    <div>
-      <button onclick="loadData()"
-              class="w-full h-10 flex items-center justify-center gap-2 btn btn-primary text-white rounded-lg hover:bg-blue-700 transition">
-        <i class="fas fa-search"></i>
-        Tampilkan
-      </button>
+            <div>
+                <button onclick="loadData()"
+                    class="w-full h-10 flex items-center justify-center gap-2 btn btn-primary text-white rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-search"></i>
+                    Tampilkan
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
 
         <!-- Monthly Filter Form -->
@@ -874,7 +861,7 @@
                 </button>
                 </div>
             </div>
-            </div>
+        </div>
 
 
         <!-- Loading State -->
@@ -883,56 +870,56 @@
             <div style="margin-top: 16px; color: #6b7280;">Memuat data...</div>
         </div>
 
+        
+
+
         <!-- Daily Results -->
-        <div id="resultsContainer" class="hidden space-y-6">
+        <div id="resultsContainer" class="hidden space-y-6">   
             <div class="stats-grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-               <div class="bg-white rounded-lg shadow-sm border p-4">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-600 rounded-xl mr-4">
-                            <i class="fas fa-users text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-600 text-sm">Total Siswa</p>
-                            <p class="text-xl font-bold text-gray-800" id="totalStudents">0</p>
-                        </div>
+            <div class="bg-white rounded-lg shadow-sm border p-4">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 text-blue-600 p-3 rounded-lg mr-3">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Total Siswa</p>
+                        <p class="text-xl font-bold text-gray-800" id="totalStudents">0</p>
                     </div>
                 </div>
-                
-                <div class="bg-white rounded-lg shadow-sm border p-4">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 flex items-center justify-center bg-green-100 text-green-600 rounded-xl mr-4">
-                            <i class="fas fa-check-circle text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-600 text-sm">Hadir</p>
-                            <p class="text-xl font-bold text-green-600" id="presentCount">0</p>
-                        </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border p-4">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 p-3 rounded-lg mr-3 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Hadir</p>
+                        <p class="text-xl font-bold text-green-600" id="presentCount">0</p>
                     </div>
                 </div>
-                
-                <div class="bg-white rounded-lg shadow-sm border p-4">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 flex items-center justify-center bg-red-100 text-red-600 rounded-xl mr-4">
-                            <i class="fas fa-times-circle text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-600 text-sm">Tidak Hadir</p>
-                            <p class="text-xl font-bold text-red-600" id="absentCount">0</p>
-                        </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border p-4">
+                <div class="flex items-center">
+                    <div class="bg-red-100 text-red-600 p-3 rounded-lg mr-3">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Tidak Hadir</p>
+                        <p class="text-xl font-bold text-red-600" id="absentCount">0</p>
                     </div>
                 </div>
-                
-                <div class="bg-white rounded-lg shadow-sm border p-4">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 flex items-center justify-center bg-yellow-100 text-yellow-600 rounded-xl mr-4">
-                            <i class="fas fa-percentage text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-600 text-sm">Persentase Hadir</p>
-                            <p class="text-xl font-bold text-yellow-600" id="attendanceRate">0%</p>
-                        </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border p-4">
+                <div class="flex items-center">
+                    <div class="bg-yellow-100 text-yellow-600 p-3 rounded-lg mr-3">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Persentase Hadir</p>
+                        <p class="text-xl font-bold text-yellow-600" id="attendanceRate">0%</p>
                     </div>
                 </div>
+            </div>
             </div>
             
             <div class="stats-grid">                
@@ -1008,6 +995,7 @@
                 </div>
             </div>
             </div>
+           
 
             <!-- Charts Section -->
             <div class="chart-grid">
@@ -1031,6 +1019,8 @@
                     </div>
                 </div>
             </div>
+
+           
 
             <!-- Data Table -->
             <div class="card">
@@ -1274,8 +1264,12 @@
     
 
     
-    <script src="https://cdn.tailwindcss.com"></script>   
-        <script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+    
+
+    <script>
         // Loading screen functionality
         window.addEventListener('load', function() {
             // Simulate minimum loading time for better UX
@@ -1306,9 +1300,11 @@
         let sheetsData = [];
         let dateColumns = [];
 
+
         // Chart instances for cleanup
         let pieChart = null;
         let dailyBarChart = null;
+        
 
         // Toast notification function
         function showToast(message, type = 'info', duration = 4000) {
@@ -1430,6 +1426,9 @@
                 showToast('Gagal memuat data dari Google Sheets. Pastikan API Key sudah benar dan sheet dapat diakses publik.', 'error', 6000);
             }
         }
+
+
+        
 
         // Function to determine semester based on current date
         function getSemester() {
@@ -1685,7 +1684,9 @@
             }, 500);
         }
 
-         function displayData(data, tanggal, kelas) {
+        
+
+        function displayData(data, tanggal, kelas) {
             // Update table title
             const formattedDate = new Date(tanggal).toLocaleDateString('id-ID', {
                 weekday: 'long',
@@ -1794,7 +1795,8 @@
             requestAnimationFrame(updateCounter);
         }
 
-            // Fungsi untuk membuat Donut Chart dengan persentase kehadiran
+
+        // Fungsi untuk membuat Donut Chart dengan persentase kehadiran
         function createpieChart(stats) {
             const ctx = document.getElementById('pieChart').getContext('2d');
             
@@ -2021,6 +2023,9 @@
 
 
 
+
+
+
         // Export functions for Daily Report
         function exportDailyToExcel() {
             try {
@@ -2062,7 +2067,7 @@
                 
                 // Add data rows and count statistics
                 filteredData.forEach((student, index) => {
-                    const status = student.dates[tanggal] || 'TIDAK ADA DATA';
+                    const status = student.dates[tanggal] || '-';
                     
                     // Count status
                     switch(status.toLowerCase()) {
@@ -2422,6 +2427,17 @@
             }
         }
 
+////////////////////////////////////////////////////////////////
+
+    
+
+///////////////////////////////////////////////////////////////
+
+
+
+
+
+
         function printMonthlyToPDF() {
             try {
                 const bulan = document.getElementById('bulanFilter').value;
@@ -2616,19 +2632,4 @@
 
 
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a38f1de6f7604a',t:'MTc1NDM2ODIyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
