@@ -8,6 +8,10 @@
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -143,6 +147,48 @@
         
         #mainContent.show {
             opacity: 1;
+        }
+
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+
+        .chart-grid {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .chart-card {
+            background-color: #ffffff; /* bg-white */
+            border-radius: 0.5rem;    /* rounded-lg = 8px */
+            border: 1px solid #e5e7eb; /* border-gray-200 */
+            padding: 1rem;            /* p-4 = 16px */
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
+        }
+
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-title i {
+            color: #667eea;
         }
         
 
@@ -530,70 +576,193 @@
     <div class="container mx-auto px-6 py-8">
 <!--         Dashboard statistik baru  -->
         <!-- Summary Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-24 flex items-center">
-                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-check text-green-500 text-lg"></i>
-                </div>
-                <div class="ml-3 min-w-0 flex-1">
-                    <p class="text-xs font-medium text-gray-600 truncate">Total Siswa</p>
-                    <p class="text-xl font-bold text-gray-900">383</p>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-24 flex items-center">
-                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-times text-red-500 text-lg"></i>
-                </div>
-                <div class="ml-3 min-w-0 flex-1">
-                    <p class="text-xs font-medium text-gray-600 truncate">Total Alpa</p>
-                    <p id="totalAlpa" class="text-xl font-bold text-gray-900">0</p>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-24 flex items-center">
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-stethoscope text-blue-600 text-lg"></i>
-                </div>
-                <div class="ml-3 min-w-0 flex-1">
-                    <p class="text-xs font-medium text-gray-600 truncate">Total Sakit</p>
-                    <p id="totalSakit" class="text-xl font-bold text-gray-900">0</p>
+         
+        
+        <!-- Statistik Baru -->
+         <!-- Daily Results -->
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6 w-full max-w-full">
+            <!-- Total Siswa -->
+            <div class="bg-white rounded-lg shadow-sm border p-4">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg mr-3">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Total Siswa</p>
+                        <p class="text-xl font-bold text-gray-800">384</p>
+                    </div>
                 </div>
             </div>
-            
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-24 flex items-center">
-                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-envelope text-yellow-600 text-lg"></i>
-                </div>
-                <div class="ml-3 min-w-0 flex-1">
-                    <p class="text-xs font-medium text-gray-600 truncate">Total Izin</p>
-                    <p id="totalIzin" class="text-xl font-bold text-gray-900">0</p>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-24 flex items-center">
-                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-clock text-orange-600 text-lg"></i>
-                </div>
-                <div class="ml-3 min-w-0 flex-1">
-                    <p class="text-xs font-medium text-gray-600 truncate">Total Terlambat</p>
-                    <p id="totalTerlambat" class="text-xl font-bold text-gray-900">0</p>
+            <!-- Hadir -->
+            <div class="bg-white rounded-lg shadow-sm border p-4">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 flex items-center justify-center bg-green-100 text-green-600 rounded-lg mr-3">
+                        <i class="fas fa-check-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Hadir Hari Ini</p>
+                        <p class="text-xl font-bold text-green-600" id="presentCount">0</p>
+                    </div>
                 </div>
             </div>
-            
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-24 flex items-center">
-                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-user-slash text-purple-600 text-lg"></i>
+            <!-- Tidak Hadir -->
+            <div class="bg-white rounded-lg shadow-sm border p-4">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 flex items-center justify-center bg-red-100 text-red-600 rounded-lg mr-3">
+                        <i class="fas fa-times-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Tidak Hadir</p>
+                        <p class="text-xl font-bold text-red-600" id="absentCount">0</p>
+                    </div>
                 </div>
-                <div class="ml-3 min-w-0 flex-1">
-                    <p class="text-xs font-medium text-gray-600 truncate">Total Bolos</p>
-                    <p id="totalBolos" class="text-xl font-bold text-gray-900">0</p>
+            </div>
+            <!-- Persentase Hadir -->
+            <div class="bg-white rounded-lg shadow-sm border p-4">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 flex items-center justify-center bg-yellow-100 text-yellow-600 rounded-lg mr-3">
+                        <i class="fas fa-percentage text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Persentase Hadir</p>
+                        <p class="text-xl font-bold text-yellow-600" id="attendanceRate">0%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kehadiran Detail Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-6 w-full max-w-full">
+            <!-- Alpa -->
+            <div class="bg-white rounded-lg shadow-sm border p-4 flex items-center">
+                <div class="w-10 h-10 flex items-center justify-center bg-red-100 text-red-600 rounded-xl mr-3">
+                    <i class="fas fa-times text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-gray-600 text-xs">Alpa</p>
+                    <p class="text-lg font-bold text-red-600" id="countAlpa">0</p>
+                </div>
+            </div>
+            <!-- Sakit -->
+            <div class="bg-white rounded-lg shadow-sm border p-4 flex items-center">
+                <div class="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-xl mr-3">
+                    <i class="fas fa-thermometer-half text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-gray-600 text-xs">Sakit</p>
+                    <p class="text-lg font-bold text-blue-600" id="countSakit">0</p>
+                </div>
+            </div>
+            <!-- Izin -->
+            <div class="bg-white rounded-lg shadow-sm border p-4 flex items-center">
+                <div class="w-10 h-10 flex items-center justify-center bg-yellow-100 text-yellow-600 rounded-xl mr-3">
+                    <i class="fas fa-hand-paper text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-gray-600 text-xs">Izin</p>
+                    <p class="text-lg font-bold text-yellow-600" id="countIzin">0</p>
+                </div>
+            </div>
+            <!-- Bolos -->
+            <div class="bg-white rounded-lg shadow-sm border p-4 flex items-center">
+                <div class="w-10 h-10 flex items-center justify-center bg-purple-100 text-purple-600 rounded-xl mr-3">
+                    <i class="fas fa-user-slash text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-gray-600 text-xs">Bolos</p>
+                    <p class="text-lg font-bold text-purple-600" id="countBolos">0</p>
+                </div>
+            </div>
+            <!-- Terlambat -->
+            <div class="bg-white rounded-lg shadow-sm border p-4 flex items-center">
+                <div class="w-10 h-10 flex items-center justify-center bg-orange-100 text-orange-600 rounded-xl mr-3">
+                    <i class="fas fa-clock text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-gray-600 text-xs">Terlambat</p>
+                    <p class="text-lg font-bold text-orange-600" id="countTerlambat">0</p>
+                </div>
+            </div>
+            <!-- Belum Presensi -->
+            <div class="bg-white rounded-lg shadow-sm border p-4 flex items-center">
+                <div class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-600 rounded-xl mr-3">
+                    <i class="fas fa-question text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-gray-600 text-xs">Belum Presensi</p>
+                    <p class="text-lg font-bold text-gray-600" id="otherCount">0</p>
                 </div>
             </div>
         </div>         
+    
+        
+        <!-- Tabel Statistik Semua Kelas -->
+        <!-- <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 space-y-6 w-full max-w-full"> -->
+            <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
+                    <div class="glass-card chart-card">
+                        <h3 class="chart-title">
+                            <i class="fas fa-chart-pie"></i>
+                            Distribusi Kehadiran
+                        </h3>
+                        <div class="chart-container">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass-card chart-card">
+                        <h3 class="chart-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Statistik Kehadiran
+                        </h3>
+                        <div class="chart-container">
+                            <canvas id="dailyBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+        <!-- </div> -->
+
+        
+
+
+
+
+        <div class="grid gap-8 py-8">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-table mr-2 text-blue-600"></i>
+                Statistik Kehadiran Hari Ini
+            </h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full border border-gray-300 text-sm text-left">
+            <thead class="bg-gray-100 text-gray-700">
+                <tr>
+                <th class="px-4 py-2 border">Kelas</th>
+                <th class="px-4 py-2 border">Total Siswa</th>
+                <th class="px-4 py-2 border">Hadir</th>
+                <th class="px-4 py-2 border">Alpa</th>
+                <th class="px-4 py-2 border">Izin</th>
+                <th class="px-4 py-2 border">Sakit</th>
+                <th class="px-4 py-2 border">Terlambat</th>
+                <th class="px-4 py-2 border">Bolos</th>
+                <th class="px-4 py-2 border">Belum Presensi</th>
+                <th class="px-4 py-2 border">Total Presensi</th>
+                <th class="px-4 py-2 border">Persen Hadir</th>
+                </tr>
+            </thead>
+            <tbody id="statistikTableBody">
+                <!-- Data kelas akan dimuat otomatis -->
+            </tbody>
+            </table>
+        </div>
+        </div>
+        </div>
+
+
         
         <!-- Main Content Grid -->
-        <div class="grid gap-8">
+        <div class="grid ">
             <!-- Riwayat Presensi Terbaru -->
             <div class="bg-white p-2 animate-fade-in rounded-lg shadow-sm border border-gray-200 w-full max-w-full">
                 <div class="p-4 sm:p-2 border-b border-gray-200">
@@ -772,6 +941,11 @@
         // Variabel global
         
         let allData = [];
+
+        // Chart instances for cleanup
+        let pieChart = null;
+        let dailyBarChart = null;
+
         // let filteredData = [];
         let lastDataCount = 0;
         let refreshInterval;
@@ -927,81 +1101,347 @@ async function fetchDataFromSheets(showLoading = false) {
     }
 }
         
-        // Fungsi untuk memperbarui statistik
-        // Asli
-        // function updateStatistics() {
-        //     const hadir = allData.filter(item => item.keterangan.toLowerCase().includes('hadir')).length;
-        //     const alpa = allData.filter(item => item.keterangan.toLowerCase().includes('alpa')).length;
-        //     const sakit = allData.filter(item => item.keterangan.toLowerCase().includes('sakit')).length;
-        //     const izin = allData.filter(item => item.keterangan.toLowerCase().includes('izin')).length;
-        //     const terlambat = allData.filter(item => item.keterangan.toLowerCase().includes('terlambat')).length;
-            
-        //     document.getElementById('totalHadir').textContent = hadir;
-        //     document.getElementById('totalAlpa').textContent = alpa;
-        //     document.getElementById('totalSakit').textContent = sakit;
-        //     document.getElementById('totalIzin').textContent = izin;
-        //     document.getElementById('totalTerlambat').textContent = terlambat;
-        // }
+       
 
-        // Ganti URL_APLIKASI_WEB dengan URL yang Anda dapatkan di Langkah 2
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyLClbdNGcm3oEhYbTt4XEZpMg3C_WgmYPttYXlvJXaNoy-2jcz4d5KIU7ZrWBsBgNs/exec'; 
+// Ganti URL_APLIKASI_WEB dengan URL yang Anda dapatkan di Langkah 2
+// const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFO59Hi1pyMgy3Eyi7-y0Ow0Dxr0VNAEfy2ouLNK8TXGt8SdhtoDF-TTLox_ZVV2RyoQ/exec'; 
 
 
 // Fungsi untuk mengambil dan memperbarui statistik dari Google Apps Script
-function updateStatistics() {
-    fetch(SCRIPT_URL)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error(data.error);
-                return;
+const scriptURL = "https://script.google.com/macros/s/AKfycbyvBMOFQ2oYY-PIaMpzejTBmxEp1mRHnm4OLu56_JG7GeeNAGBflsE2b6nND3Dcjj_zrw/exec"; // ganti dengan URL Web App Anda
+
+  const allowedClasses = [
+    "7A","7B","7C","7D","7E",
+    "8A","8B","8C","8D",
+    "9A","9B","9C","9D","9E"
+  ];
+  const allowedIndex = allowedClasses.reduce((a,v,i)=>{a[v]=i;return a;},{})
+
+  function normalizeClass(v){
+    return String(v||"").trim().toUpperCase();
+  }
+
+  async function loadStatistikUmum() {
+      try {
+        const res = await fetch(`${scriptURL}?action=umum`);
+        const data = await res.json();
+
+        const totalHadir = Number(data["TOTAL HADIR"]) || 0;
+        const totalAlpa = Number(data["TOTAL ALPA"]) || 0;
+        const totalIzin = Number(data["TOTAL IZIN"]) || 0;
+        const totalSakit = Number(data["TOTAL SAKIT"]) || 0;
+        const totalTerlambat = Number(data["TOTAL TERLAMBAT"]) || 0;
+        const totalBolos = Number(data["TOTAL BOLOS"]) || 0;
+        const belumPresensi = Number(data["BELUM PRESENSI"]) || 0;
+        const totalPresensi = Number(data["TOTAL PRESENSI"]) || 0;
+        const persenHadir = Number(data["PERSENTASE HADIR"]) || 0;
+
+        document.getElementById("presentCount").textContent = totalHadir;
+        document.getElementById("absentCount").textContent = totalAlpa + totalIzin + totalSakit + totalBolos;
+        document.getElementById("attendanceRate").textContent =
+          totalPresensi > 0 ? ((totalHadir / 384) * 100).toFixed(1) + "%" : "0%";
+
+        document.getElementById("countAlpa").textContent = totalAlpa;
+        document.getElementById("countSakit").textContent = totalSakit;
+        document.getElementById("countIzin").textContent = totalIzin;
+        document.getElementById("countBolos").textContent = totalBolos;
+        document.getElementById("countTerlambat").textContent = totalTerlambat;
+        document.getElementById("otherCount").textContent = belumPresensi;
+        // document.getElementById("totalStudents").textContent = totalPresensi + belumPresensi;
+        // 🔹 Panggil chart setelah data terisi
+        createPieChart({
+        hadir: totalHadir,
+        alpa: totalAlpa,
+        izin: totalIzin,
+        sakit: totalSakit,
+        terlambat: totalTerlambat,
+        bolos: totalBolos,
+        other: belumPresensi
+        });
+
+        createDailyBarChart({
+        hadir: totalHadir,
+        alpa: totalAlpa,
+        izin: totalIzin,
+        sakit: totalSakit,
+        terlambat: totalTerlambat,
+        bolos: totalBolos
+        });
+
+
+
+
+      } catch (err) {
+        console.error("Error loadStatistikUmum:", err);
+      }
+
+      
+    }
+
+  async function updateStatistics(){
+    try{
+      const res = await fetch(`${scriptURL}?action=kelas`);
+      const data = await res.json();
+      const tbody = document.getElementById("statistikTableBody");
+
+      // Filter + urutkan sesuai allowedClasses
+      const filtered = data
+        .filter(r => allowedClasses.includes(normalizeClass(r["Kelas"])))
+        .sort((a,b)=>allowedIndex[normalizeClass(a["Kelas"])]-allowedIndex[normalizeClass(b["Kelas"])]);
+
+      let rows = "";
+      filtered.forEach(row=>{
+        const kelas = normalizeClass(row["Kelas"]);
+        const show = v => (v===""||v==null? "-" : v);
+
+        let persen = parseFloat(row["PERSENTASE HADIR"]);
+        if(!isNaN(persen) && persen<=1) persen *= 100; // kalau masih 0–1
+        const persenText = isNaN(persen)? "-" : persen.toFixed(2)+"%";
+        const persenClass = (!isNaN(persen)&&persen>=75)
+            ? "text-green-600 font-semibold"
+            : "text-red-600 font-semibold";
+
+        rows += `
+          <tr>
+            <td class="px-4 py-2 border">${kelas}</td>
+            <td class="px-4 py-2 border">${show(row["TOTAL SISWA"])}</td>
+            <td class="px-4 py-2 border">${show(row["TOTAL HADIR"])}</td>
+            <td class="px-4 py-2 border">${show(row["TOTAL ALPA"])}</td>
+            <td class="px-4 py-2 border">${show(row["TOTAL IZIN"])}</td>
+            <td class="px-4 py-2 border">${show(row["TOTAL SAKIT"])}</td>
+            <td class="px-4 py-2 border">${show(row["TOTAL TERLAMBAT"])}</td>
+            <td class="px-4 py-2 border">${show(row["TOTAL BOLOS"])}</td>
+            <td class="px-4 py-2 border">${show(row["BELUM PRESENSI"])}</td>
+            <td class="px-4 py-2 border">${show(row["TOTAL PRESENSI"])}</td>
+            <td class="px-4 py-2 border ${persenClass}">${persenText}</td>
+          </tr>`;
+      });
+
+      tbody.innerHTML = rows || `<tr><td colspan="11" class="px-4 py-2 border text-gray-500">Tidak ada data</td></tr>`;
+    }catch(err){
+      console.error("Error:",err);
+      document.getElementById("statistikTableBody").innerHTML =
+        `<tr><td colspan="11" class="px-4 py-2 border text-red-600">Gagal memuat data</td></tr>`;
+    }
+  }
+
+        // Panggil fungsi ini saat halaman dimuat
+        updateStatistics();     
+        loadStatistikUmum();
+
+        ///////////////////////////////////////////
+        
+        function createPieChart(stats) {
+        const ctx = document.getElementById('pieChart').getContext('2d');
+
+        if (pieChart) {
+            pieChart.destroy();
+        }
+
+        const total = stats.hadir + stats.alpa + stats.izin + stats.sakit + stats.terlambat + stats.bolos + stats.other;
+        const persenHadir = total > 0 ? Math.round((stats.hadir / total) * 100) : 0;
+
+        pieChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+            labels: ['Hadir', 'Alpa', 'Izin', 'Sakit', 'Terlambat', 'Bolos', 'Belum Presensi'],
+            datasets: [{
+                data: [
+                stats.hadir,
+                stats.alpa,
+                stats.izin,
+                stats.sakit,
+                stats.terlambat,
+                stats.bolos,
+                stats.other
+                ],
+                backgroundColor: [
+                '#10b981', // Hadir
+                '#ef4444', // Alpa
+                '#f59e0b', // Izin
+                '#8b5cf6', // Sakit
+                '#f97316', // Terlambat
+                '#374151', // Bolos
+                '#9ca3af'  // Belum Presensi
+                ],
+                borderWidth: 3,
+                borderColor: '#fff',
+                cutout: '60%'
+            }]
+            },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                position: 'bottom',
+                labels: { usePointStyle: true }
+                },
+                tooltip: {
+                callbacks: {
+                    label: function(context) {
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                    return `${context.label}: ${context.parsed} siswa (${percentage}%)`;
+                    }
+                }
+                }
             }
+            },
+            plugins: [{
+            id: 'centerText',
+            beforeDraw: function(chart) {
+                const ctx = chart.ctx;
+                const {width, height} = chart;
+                const centerX = width / 2;
+                const centerY = height / 2;
 
-            // Memperbarui elemen HTML dengan nilai dari data yang diterima
-            // document.getElementById('totalHadir').textContent = data.totalHadir;
-            document.getElementById('totalAlpa').textContent = data.totalAlpa;
-            document.getElementById('totalSakit').textContent = data.totalSakit;
-            document.getElementById('totalIzin').textContent = data.totalIzin;
-            document.getElementById('totalTerlambat').textContent = data.totalTerlambat;
-            document.getElementById('totalBolos').textContent = data.totalBolos;
-        })
-        .catch(error => console.error('Error fetching statistics:', error));
-}
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = 'bold 22px Inter';
+                ctx.fillStyle = persenHadir >= 75 ? '#10b981' : persenHadir >= 60 ? '#f59e0b' : '#ef4444';
+                ctx.fillText(persenHadir + "%", centerX, centerY - 10);
 
-// Panggil fungsi ini saat halaman dimuat
-updateStatistics();
+                ctx.font = '12px Inter';
+                ctx.fillStyle = '#6b7280';
+                ctx.fillText("Tingkat Kehadiran", centerX, centerY + 15);
+                ctx.restore();
+            }
+            }]
+        });
+        }
+
+        // Function untuk buat bar chart harian
+  function createDailyBarChart(stats) {
+    const ctx = document.getElementById('dailyBarChart');
+    if (!ctx) return;
+
+    // Hapus chart lama
+    if (dailyBarChart) {
+      dailyBarChart.destroy();
+      dailyBarChart = null;
+    }
+
+    const labels = ['Hadir', 'Alpa', 'Izin', 'Sakit', 'Terlambat', 'Bolos'];
+    const values = [
+      stats.hadir || 0,
+      stats.alpa || 0,
+      stats.izin || 0,
+      stats.sakit || 0,
+      stats.terlambat || 0,
+      stats.bolos || 0
+    ];
+
+    const backgroundColors = [
+      'rgba(16, 185, 129, 0.8)', // hijau
+      'rgba(239, 68, 68, 0.8)',  // merah
+      'rgba(245, 158, 11, 0.8)', // kuning
+      'rgba(139, 92, 246, 0.8)', // ungu
+      'rgba(249, 115, 22, 0.8)', // oranye
+      'rgba(107, 114, 128, 0.8)' // abu
+    ];
+
+    const borderColors = [
+      '#10b981',
+      '#ef4444',
+      '#f59e0b',
+      '#8b5cf6',
+      '#f97316',
+      '#6b7280'
+    ];
+
+    const data = {
+      labels: labels,
+      datasets: [{
+        label: 'Jumlah Siswa',
+        data: values,
+        backgroundColor: backgroundColors,
+        borderColor: borderColors,
+        borderWidth: 2,
+        borderRadius: 8,
+        maxBarThickness: 60
+      }]
+    };
+
+    try {
+      dailyBarChart = new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              titleColor: '#ffffff',
+              bodyColor: '#ffffff',
+              borderColor: '#ffffff',
+              borderWidth: 1,
+              cornerRadius: 8,
+              callbacks: {
+                title: function(context) {
+                  return `Status: ${context[0].label}`;
+                },
+                label: function(context) {
+                  const total = values.reduce((a, b) => a + b, 0);
+                  const percentage = total > 0 ? ((context.parsed.y / total) * 100).toFixed(1) : 0;
+                  return `Jumlah: ${context.parsed.y} siswa (${percentage}%)`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1,
+                font: { family: 'Inter', size: 11 },
+                color: '#64748b',
+                callback: function(value) {
+                  return Number.isInteger(value) ? value : '';
+                }
+              },
+              grid: { color: 'rgba(148, 163, 184, 0.2)', drawBorder: false },
+              border: { display: false }
+            },
+            x: {
+              ticks: {
+                font: { family: 'Inter', size: 11, weight: '500' },
+                color: '#475569',
+                maxRotation: 0
+              },
+              grid: { display: false },
+              border: { display: false }
+            }
+          },
+          animation: {
+            duration: 1000,
+            easing: 'easeOutQuart',
+            delay: (context) => context.dataIndex * 100
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error creating bar chart:', error);
+    }
+  }
 
 
-        
-        
-        // Fungsi untuk mengisi filter
-        // function populateFilters() {
-        //     const kelasSet = new Set(allData.map(item => item.kelas).filter(kelas => kelas));
-        //     const filterKelas = document.getElementById('filterKelas');
-        //     const rekapKelas = document.getElementById('rekapKelas');
-            
-            // Clear existing options
-            // while (filterKelas.children.length > 1) {
-            //     filterKelas.removeChild(filterKelas.lastChild);
-            // }
-            // while (rekapKelas.children.length > 1) {
-            //     rekapKelas.removeChild(rekapKelas.lastChild);
-            // }
-            
-            // Add new options
-        //     Array.from(kelasSet).sort().forEach(kelas => {
-        //         const option1 = document.createElement('option');
-        //         option1.value = kelas;
-        //         option1.textContent = kelas;
-        //         filterKelas.appendChild(option1);
+
+    
+
+
+
+
+
+
+
+
+
+        ////////////////////////////////////////////
                 
-        //         const option2 = document.createElement('option');
-        //         option2.value = kelas;
-        //         option2.textContent = kelas;
-        //         rekapKelas.appendChild(option2);
-        //     });
-        // }
-        
         // Fungsi untuk menampilkan rekap kelas
         function displayClassRecap(selectedClass) {
             const display = document.getElementById('classRekapDisplay');
