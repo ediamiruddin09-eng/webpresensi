@@ -732,23 +732,23 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                 <i class="fas fa-table mr-2 text-blue-600"></i>
-                Statistik Kehadiran Hari Ini
+                Data Kehadiran Hari Ini
             </h2>
         <div class="overflow-x-auto">
             <table class="min-w-full border border-gray-300 text-sm text-left">
             <thead class="bg-gray-100 text-gray-700">
                 <tr>
-                <th class="px-4 py-2 border">Kelas</th>
-                <th class="px-4 py-2 border">Total Siswa</th>
-                <th class="px-4 py-2 border">Hadir</th>
-                <th class="px-4 py-2 border">Alpa</th>
-                <th class="px-4 py-2 border">Izin</th>
-                <th class="px-4 py-2 border">Sakit</th>
-                <th class="px-4 py-2 border">Terlambat</th>
-                <th class="px-4 py-2 border">Bolos</th>
-                <th class="px-4 py-2 border">Belum Presensi</th>
-                <th class="px-4 py-2 border">Total Presensi</th>
-                <th class="px-4 py-2 border">Persen Hadir</th>
+                <th class="px-4 py-2 border" style="text-align:center;">Kelas</th>
+                <th class="px-4 py-2 border" style="text-align:center;">Total Siswa</th>
+                <th class="px-4 py-2 border" style="text-align:center;">Hadir</th>
+                <th class="px-4 py-2 border" style="text-align:center;">Alpa</th>
+                <th class="px-4 py-2 border" style="text-align:center;">Izin</th>
+                <th class="px-4 py-2 border" style="text-align:center;">Sakit</th>
+                <th class="px-4 py-2 border" style="text-align:center;">Terlambat</th>
+                <th class="px-4 py-2 border" style="text-align:center;">Bolos</th>
+                <th class="px-4 py-2 border" style="text-align:center;">Belum Presensi</th>
+                <th class="px-4 py-2 border" style="text-align:center;">Total Presensi</th>
+                <th class="px-4 py-2 border" style="text-align:center;">Persen Hadir</th>
                 </tr>
             </thead>
             <tbody id="statistikTableBody">
@@ -1203,17 +1203,17 @@ const scriptURL = "https://script.google.com/macros/s/AKfycbyvBMOFQ2oYY-PIaMpzej
 
         rows += `
           <tr>
-            <td class="px-4 py-2 border">${kelas}</td>
-            <td class="px-4 py-2 border">${show(row["TOTAL SISWA"])}</td>
-            <td class="px-4 py-2 border">${show(row["TOTAL HADIR"])}</td>
-            <td class="px-4 py-2 border">${show(row["TOTAL ALPA"])}</td>
-            <td class="px-4 py-2 border">${show(row["TOTAL IZIN"])}</td>
-            <td class="px-4 py-2 border">${show(row["TOTAL SAKIT"])}</td>
-            <td class="px-4 py-2 border">${show(row["TOTAL TERLAMBAT"])}</td>
-            <td class="px-4 py-2 border">${show(row["TOTAL BOLOS"])}</td>
-            <td class="px-4 py-2 border">${show(row["BELUM PRESENSI"])}</td>
-            <td class="px-4 py-2 border">${show(row["TOTAL PRESENSI"])}</td>
-            <td class="px-4 py-2 border ${persenClass}">${persenText}</td>
+            <td style="text-align:center;" class="px-4 py-2 border">${kelas}</td>
+            <td style="text-align:center;" class="px-4 py-2 border">${show(row["TOTAL SISWA"])}</td>
+            <td style="text-align:center;" class="px-4 py-2 border">${show(row["TOTAL HADIR"])}</td>
+            <td style="text-align:center;" class="px-4 py-2 border">${show(row["TOTAL ALPA"])}</td>
+            <td style="text-align:center;" class="px-4 py-2 border">${show(row["TOTAL IZIN"])}</td>
+            <td style="text-align:center;" class="px-4 py-2 border">${show(row["TOTAL SAKIT"])}</td>
+            <td style="text-align:center;" class="px-4 py-2 border">${show(row["TOTAL TERLAMBAT"])}</td>
+            <td style="text-align:center;" class="px-4 py-2 border">${show(row["TOTAL BOLOS"])}</td>
+            <td style="text-align:center;" class="px-4 py-2 border">${show(row["BELUM PRESENSI"])}</td>
+            <td style="text-align:center;" class="px-4 py-2 border">${show(row["TOTAL PRESENSI"])}</td>
+            <td style="text-align:center;" class="px-4 py-2 border ${persenClass}">${persenText}</td>
           </tr>`;
       });
 
